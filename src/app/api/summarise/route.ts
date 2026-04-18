@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
 2. Any patterns you notice
 3. Gentle reminders or suggestions
 
-Be warm but factual. Don't diagnose. Use plain language. Keep each bullet to 1-2 sentences.
+Be warm but factual. Don't diagnose. Use plain language. Keep each bullet to 1-2 sentences. Do not use any markdown formatting like bold (**), italics, or headers. Just plain text with bullet points (-).
 
 BODY ANNOTATIONS (notes and markers on body parts):
 ${annotations || "None recorded"}
