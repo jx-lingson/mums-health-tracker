@@ -13,6 +13,7 @@ import VitalCard from "./vitals/VitalCard";
 import HistorySection from "./history/HistorySection";
 import LinksSection from "./LinksSection";
 import AISummary from "./AISummary";
+import Dock from "./Dock";
 
 const BODY_PART_CENTERS: Record<string, [number, number]> = {
   head: [150, 52], neck: [150, 97], "left-shoulder": [125, 111], "right-shoulder": [175, 111],
@@ -38,10 +39,13 @@ type Modal =
   | { type: "edit-marker"; marker: Marker }
   | null;
 
+type Tab = "health" | "records";
+
 export default function Dashboard() {
   const [data, setData, syncing] = useCloudStorage<HealthData>("health-tracker-data", EMPTY_HEALTH_DATA);
   const [modal, setModal] = useState<Modal>(null);
   const [isPlacingMarker, setIsPlacingMarker] = useState(false);
+  const [activeTab, setActiveTab] = useState<Tab>("health");
 
   const age = calculateAge(MUM_DOB);
 
@@ -109,6 +113,23 @@ export default function Dashboard() {
     if (partId) markerCounts[partId] = (markerCounts[partId] || 0) + 1;
   });
 
+  const dockItems = [
+    {
+      id: "health",
+      label: "Health",
+      icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>,
+      active: activeTab === "health",
+      onClick: () => setActiveTab("health"),
+    },
+    {
+      id: "records",
+      label: "Records",
+      icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>,
+      active: activeTab === "records",
+      onClick: () => setActiveTab("records"),
+    },
+  ];
+
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white">
       {/* Header */}
@@ -126,7 +147,26 @@ export default function Dashboard() {
               )}
             </div>
           </div>
-          <div className="text-right">
+          <div className="flex items-center gap-4">
+            {/* Desktop tab nav */}
+            <nav className="hidden md:flex items-center gap-1 bg-neutral-900 rounded-xl p-1 border border-neutral-800">
+              <button
+                onClick={() => setActiveTab("health")}
+                className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${
+                  activeTab === "health" ? "bg-orange-600 text-white" : "text-neutral-400 hover:text-white"
+                }`}
+              >
+                Health
+              </button>
+              <button
+                onClick={() => setActiveTab("records")}
+                className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${
+                  activeTab === "records" ? "bg-orange-600 text-white" : "text-neutral-400 hover:text-white"
+                }`}
+              >
+                Records
+              </button>
+            </nav>
             <div className="bg-gradient-to-br from-orange-500 to-orange-700 rounded-2xl px-5 py-3">
               <p className="text-3xl font-bold tabular-nums leading-none">{age.years}</p>
               <p className="text-orange-200 text-xs mt-1">years, {age.months}mo</p>
@@ -136,104 +176,113 @@ export default function Dashboard() {
       </header>
 
       <main className="max-w-6xl mx-auto px-6 py-8 space-y-6">
-        {/* AI Summary */}
-        <AISummary data={data} />
+        {activeTab === "health" && (
+          <>
+            {/* AI Summary */}
+            <AISummary data={data} />
 
-        {/* Body Map + Annotations */}
-        <section className="flex flex-col lg:flex-row gap-4">
-          <div className="lg:w-5/12">
-            <div className="bg-neutral-900 rounded-2xl border border-neutral-800 p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xs font-semibold text-neutral-500 uppercase tracking-widest">Body Map</h2>
-                <button
-                  onClick={() => { setIsPlacingMarker(!isPlacingMarker); if (!isPlacingMarker) setModal(null); }}
-                  className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${
-                    isPlacingMarker
-                      ? "bg-neutral-700 text-neutral-300"
-                      : "bg-orange-600 text-white hover:bg-orange-500"
-                  }`}
-                >
-                  {isPlacingMarker ? "Cancel" : "Add Marker"}
-                </button>
+            {/* Body Map + Annotations */}
+            <section className="flex flex-col lg:flex-row gap-4">
+              <div className="lg:w-5/12">
+                <div className="bg-neutral-900 rounded-2xl border border-neutral-800 p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-xs font-semibold text-neutral-500 uppercase tracking-widest">Body Map</h2>
+                    <button
+                      onClick={() => { setIsPlacingMarker(!isPlacingMarker); if (!isPlacingMarker) setModal(null); }}
+                      className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${
+                        isPlacingMarker ? "bg-neutral-700 text-neutral-300" : "bg-orange-600 text-white hover:bg-orange-500"
+                      }`}
+                    >
+                      {isPlacingMarker ? "Cancel" : "Add Marker"}
+                    </button>
+                  </div>
+
+                  {isPlacingMarker && (
+                    <div className="bg-orange-950/50 text-orange-400 text-xs font-medium px-3 py-2 rounded-lg mb-4 text-center border border-orange-900/50">
+                      Click anywhere on the body to place a marker
+                    </div>
+                  )}
+
+                  <div className="flex justify-center">
+                    <div className="relative inline-block">
+                      <BodySvg
+                        selectedPart={modal?.type === "part" ? modal.partId : null}
+                        onPartClick={(partId) => setModal({ type: "part", partId })}
+                        isPlacingMarker={isPlacingMarker}
+                        onMarkerPlace={handleMarkerPlace}
+                        markerCounts={markerCounts}
+                      />
+                      <MarkerLayer
+                        markers={data.markers}
+                        onMarkerClick={(marker) => setModal({ type: "edit-marker", marker })}
+                      />
+                    </div>
+                  </div>
+
+                  {modal?.type === "part" && (
+                    <div className="mt-4">
+                      <BodyPartPanel key={modal.partId} partId={modal.partId} entry={data.bodyParts[modal.partId]}
+                        onAddNote={handleAddNote} onDeleteNote={handleDeleteNote} onClose={() => setModal(null)} />
+                    </div>
+                  )}
+                  {modal?.type === "new-marker" && (
+                    <div className="mt-4">
+                      <MarkerForm onSave={handleSaveNewMarker} onCancel={() => setModal(null)} />
+                    </div>
+                  )}
+                  {modal?.type === "edit-marker" && (
+                    <div className="mt-4">
+                      <MarkerForm key={modal.marker.id} marker={modal.marker}
+                        onSave={handleUpdateMarker} onDelete={handleDeleteMarker} onCancel={() => setModal(null)} />
+                    </div>
+                  )}
+                </div>
               </div>
 
-              {isPlacingMarker && (
-                <div className="bg-orange-950/50 text-orange-400 text-xs font-medium px-3 py-2 rounded-lg mb-4 text-center border border-orange-900/50">
-                  Click anywhere on the body to place a marker
-                </div>
-              )}
-
-              <div className="flex justify-center">
-                <div className="relative inline-block">
-                  <BodySvg
-                    selectedPart={modal?.type === "part" ? modal.partId : null}
-                    onPartClick={(partId) => setModal({ type: "part", partId })}
-                    isPlacingMarker={isPlacingMarker}
-                    onMarkerPlace={handleMarkerPlace}
-                    markerCounts={markerCounts}
-                  />
-                  <MarkerLayer
-                    markers={data.markers}
+              <div className="lg:w-7/12">
+                <div className="bg-neutral-900 rounded-2xl border border-neutral-800 p-6 h-full">
+                  <h2 className="text-xs font-semibold text-neutral-500 uppercase tracking-widest mb-4">Body Annotations</h2>
+                  <AnnotationList data={data}
                     onMarkerClick={(marker) => setModal({ type: "edit-marker", marker })}
-                  />
+                    onPartClick={(partId) => setModal({ type: "part", partId })} />
                 </div>
               </div>
+            </section>
 
-              {modal?.type === "part" && (
-                <div className="mt-4">
-                  <BodyPartPanel key={modal.partId} partId={modal.partId} entry={data.bodyParts[modal.partId]}
-                    onAddNote={handleAddNote} onDeleteNote={handleDeleteNote} onClose={() => setModal(null)} />
-                </div>
-              )}
-              {modal?.type === "new-marker" && (
-                <div className="mt-4">
-                  <MarkerForm onSave={handleSaveNewMarker} onCancel={() => setModal(null)} />
-                </div>
-              )}
-              {modal?.type === "edit-marker" && (
-                <div className="mt-4">
-                  <MarkerForm key={modal.marker.id} marker={modal.marker}
-                    onSave={handleUpdateMarker} onDelete={handleDeleteMarker} onCancel={() => setModal(null)} />
-                </div>
-              )}
-            </div>
-          </div>
+            {/* Vitals */}
+            <section>
+              <h2 className="text-xs font-semibold text-neutral-500 uppercase tracking-widest mb-4">Vitals</h2>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {VITAL_TYPES.map((vt) => (
+                  <VitalCard key={vt.id} vitalDef={vt}
+                    readings={data.vitals.filter((v) => v.type === vt.id)}
+                    onLog={(value, date) => handleLogVital(vt.id, value, date)}
+                    onDelete={handleDeleteVital} />
+                ))}
+              </div>
+            </section>
+          </>
+        )}
 
-          <div className="lg:w-7/12">
-            <div className="bg-neutral-900 rounded-2xl border border-neutral-800 p-6 h-full">
-              <h2 className="text-xs font-semibold text-neutral-500 uppercase tracking-widest mb-4">Body Annotations</h2>
-              <AnnotationList data={data}
-                onMarkerClick={(marker) => setModal({ type: "edit-marker", marker })}
-                onPartClick={(partId) => setModal({ type: "part", partId })} />
-            </div>
-          </div>
-        </section>
+        {activeTab === "records" && (
+          <>
+            {/* Documents & Links */}
+            <section>
+              <h2 className="text-xs font-semibold text-neutral-500 uppercase tracking-widest mb-4">Documents & Links</h2>
+              <LinksSection data={data} onUpdate={setData} />
+            </section>
 
-        {/* Vitals */}
-        <section>
-          <h2 className="text-xs font-semibold text-neutral-500 uppercase tracking-widest mb-4">Vitals</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {VITAL_TYPES.map((vt) => (
-              <VitalCard key={vt.id} vitalDef={vt}
-                readings={data.vitals.filter((v) => v.type === vt.id)}
-                onLog={(value, date) => handleLogVital(vt.id, value, date)}
-                onDelete={handleDeleteVital} />
-            ))}
-          </div>
-        </section>
-
-        {/* Documents & Links */}
-        <section>
-          <h2 className="text-xs font-semibold text-neutral-500 uppercase tracking-widest mb-4">Documents & Links</h2>
-          <LinksSection data={data} onUpdate={setData} />
-        </section>
-
-        {/* Medical History */}
-        <section>
-          <h2 className="text-xs font-semibold text-neutral-500 uppercase tracking-widest mb-4">Medical History</h2>
-          <HistorySection data={data} onUpdate={setData} />
-        </section>
+            {/* Medical History */}
+            <section>
+              <h2 className="text-xs font-semibold text-neutral-500 uppercase tracking-widest mb-4">Medical History</h2>
+              <HistorySection data={data} onUpdate={setData} />
+            </section>
+          </>
+        )}
       </main>
+
+      {/* Mobile Dock */}
+      <Dock items={dockItems} />
     </div>
   );
 }
