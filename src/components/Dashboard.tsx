@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { HealthData, EMPTY_HEALTH_DATA, Marker } from "@/lib/types";
-import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { useCloudStorage } from "@/hooks/useCloudStorage";
 import { MUM_DOB, calculateAge, VITAL_TYPES } from "@/lib/constants";
 import BodySvg from "./body/BodySvg";
 import MarkerLayer from "./body/MarkerLayer";
@@ -39,7 +39,7 @@ type Modal =
   | null;
 
 export default function Dashboard() {
-  const [data, setData] = useLocalStorage<HealthData>("health-tracker-data", EMPTY_HEALTH_DATA);
+  const [data, setData, syncing] = useCloudStorage<HealthData>("health-tracker-data", EMPTY_HEALTH_DATA);
   const [modal, setModal] = useState<Modal>(null);
   const [isPlacingMarker, setIsPlacingMarker] = useState(false);
 
@@ -116,7 +116,15 @@ export default function Dashboard() {
         <div className="max-w-6xl mx-auto px-6 py-6 flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold tracking-tight text-white">Chinn Health</h1>
-            <p className="text-neutral-500 text-sm mt-0.5">Health monitoring dashboard</p>
+            <div className="flex items-center gap-2 mt-0.5">
+              <p className="text-neutral-500 text-sm">Health monitoring dashboard</p>
+              {syncing && (
+                <div className="flex items-center gap-1.5">
+                  <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse" />
+                  <span className="text-xs text-neutral-600">Syncing...</span>
+                </div>
+              )}
+            </div>
           </div>
           <div className="text-right">
             <div className="bg-gradient-to-br from-orange-500 to-orange-700 rounded-2xl px-5 py-3">
