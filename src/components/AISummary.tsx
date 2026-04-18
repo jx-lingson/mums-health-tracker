@@ -8,10 +8,27 @@ interface AISummaryProps {
   data: HealthData;
 }
 
+function loadStored(): { summary: string | null; lastUpdated: string | null } {
+  if (typeof window === "undefined") return { summary: null, lastUpdated: null };
+  try {
+    const raw = localStorage.getItem("health-tracker-ai-summary");
+    if (raw) return JSON.parse(raw);
+  } catch {}
+  return { summary: null, lastUpdated: null };
+}
+
 export default function AISummary({ data }: AISummaryProps) {
-  const [summary, setSummary] = useState<string | null>(null);
+  const [stored] = useState(loadStored);
+  const [summary, setSummaryState] = useState<string | null>(stored.summary);
   const [loading, setLoading] = useState(false);
-  const [lastUpdated, setLastUpdated] = useState<string | null>(null);
+  const [lastUpdated, setLastUpdatedState] = useState<string | null>(stored.lastUpdated);
+
+  function setSummary(s: string) {
+    const ts = new Date().toLocaleString("en-AU", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+    setSummaryState(s);
+    setLastUpdatedState(ts);
+    try { localStorage.setItem("health-tracker-ai-summary", JSON.stringify({ summary: s, lastUpdated: ts })); } catch {}
+  }
 
   const hasData =
     Object.keys(data.bodyParts).length > 0 ||
@@ -35,7 +52,6 @@ export default function AISummary({ data }: AISummaryProps) {
 
       const result = await res.json();
       setSummary(result.summary);
-      setLastUpdated(new Date().toLocaleTimeString("en-AU", { hour: "2-digit", minute: "2-digit" }));
     } catch {
       setSummary("Unable to generate summary right now.");
     }
