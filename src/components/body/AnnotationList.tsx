@@ -8,6 +8,16 @@ interface AnnotationListProps {
   data: HealthData;
   onMarkerClick: (marker: Marker) => void;
   onPartClick: (partId: string) => void;
+  markerCounts?: Record<string, number>;
+}
+
+function getIntensityColor(count: number): string {
+  if (count <= 0) return "rgb(64, 64, 64)";
+  const intensity = Math.min(count / 8, 1);
+  const r = Math.round(64 + intensity * (251 - 64));
+  const g = Math.round(64 + intensity * (146 - 64));
+  const b = Math.round(64 + intensity * (60 - 64));
+  return `rgb(${r}, ${g}, ${b})`;
 }
 
 interface AnnotationItem {
@@ -22,7 +32,7 @@ interface AnnotationItem {
 
 type SortOrder = "newest" | "oldest";
 
-export default function AnnotationList({ data, onMarkerClick, onPartClick }: AnnotationListProps) {
+export default function AnnotationList({ data, onMarkerClick, onPartClick, markerCounts }: AnnotationListProps) {
   const [showAll, setShowAll] = useState(false);
   const [sortOrder, setSortOrder] = useState<SortOrder>("newest");
 
@@ -65,7 +75,8 @@ export default function AnnotationList({ data, onMarkerClick, onPartClick }: Ann
           onClick={() => { if (item.type === "marker" && item.marker) onMarkerClick(item.marker); else if (item.partId) onPartClick(item.partId); }}
           className="w-full text-left group">
           <div className="flex items-start gap-3 p-3 rounded-xl hover:bg-neutral-800/50 transition-colors">
-            <div className={`mt-1.5 w-2 h-2 rounded-full flex-shrink-0 ${item.type === "marker" ? "bg-orange-500" : "bg-green-500"}`} />
+            <div className="mt-1.5 w-2.5 h-2.5 rounded-full flex-shrink-0"
+              style={{ backgroundColor: getIntensityColor(item.partId ? (markerCounts?.[item.partId] || 1) : 1) }} />
             <div className="flex-1 min-w-0">
               <div className="flex items-center justify-between gap-2">
                 <span className="text-sm font-medium text-neutral-200 truncate">{item.label}</span>

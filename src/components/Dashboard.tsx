@@ -235,7 +235,7 @@ export default function Dashboard() {
               <div className="lg:w-7/12">
                 <div className="bg-neutral-900 rounded-2xl border border-neutral-800 p-6 h-full">
                   <h2 className="text-xs font-semibold text-neutral-500 uppercase tracking-widest mb-4">Body Annotations</h2>
-                  <AnnotationList data={data}
+                  <AnnotationList data={data} markerCounts={markerCounts}
                     onMarkerClick={(marker) => setModal({ type: "edit-marker", marker })}
                     onPartClick={(partId) => setModal({ type: "part", partId })} />
                 </div>

@@ -57,8 +57,8 @@ export default function BodySvg({ selectedPart, onPartClick, isPlacingMarker, on
       </defs>
       {bodyRegions.map((region) => {
         const count = (markerCounts && markerCounts[region.id]) || 0;
-        const intensity = count > 0 ? Math.min(count / 5, 1) : 0;
-        const heatColor = intensity > 0 ? `rgba(251, 146, 60, ${0.2 + intensity * 0.5})` : "";
+        const intensity = count > 0 ? Math.min(count / 8, 1) : 0;
+        const heatColor = intensity > 0 ? `rgba(251, 146, 60, ${0.08 + intensity * 0.62})` : "";
         return (
           <path
             key={region.id}
@@ -70,7 +70,7 @@ export default function BodySvg({ selectedPart, onPartClick, isPlacingMarker, on
             }
             stroke={
               selectedPart === region.id ? "#fb923c"
-              : intensity > 0 ? `rgba(251, 146, 60, ${0.4 + intensity * 0.4})`
+              : intensity > 0 ? `rgba(251, 146, 60, ${0.15 + intensity * 0.5})`
               : "rgba(74, 222, 128, 0.2)"
             }
             strokeWidth={selectedPart === region.id ? 1.5 : 0.5}
@@ -78,7 +78,7 @@ export default function BodySvg({ selectedPart, onPartClick, isPlacingMarker, on
             className={`transition-all duration-200 ${isPlacingMarker ? "pointer-events-none" : "cursor-pointer"}`}
             onMouseEnter={(e) => {
               if (!isPlacingMarker && selectedPart !== region.id) {
-                e.currentTarget.setAttribute("fill", intensity > 0 ? `rgba(251, 146, 60, ${0.3 + intensity * 0.5})` : "url(#bodyGradHover)");
+                e.currentTarget.setAttribute("fill", intensity > 0 ? `rgba(251, 146, 60, ${0.15 + intensity * 0.55})` : "url(#bodyGradHover)");
               }
             }}
             onMouseLeave={(e) => {
