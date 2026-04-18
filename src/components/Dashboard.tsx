@@ -12,6 +12,7 @@ import AnnotationList from "./body/AnnotationList";
 import VitalCard from "./vitals/VitalCard";
 import HistorySection from "./history/HistorySection";
 import LinksSection from "./LinksSection";
+import AISummary from "./AISummary";
 
 const BODY_PART_CENTERS: Record<string, [number, number]> = {
   head: [150, 52], neck: [150, 97], "left-shoulder": [125, 111], "right-shoulder": [175, 111],
@@ -154,6 +155,9 @@ export default function Dashboard() {
       </header>
 
       <main className="max-w-6xl mx-auto px-6 py-8 space-y-8">
+        {/* AI Summary */}
+        <AISummary data={data} />
+
         {/* Body Map + Annotations */}
         <section className="flex flex-col lg:flex-row gap-6">
           {/* Body */}
