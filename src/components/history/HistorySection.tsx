@@ -51,11 +51,11 @@ export default function HistorySection({ data, onUpdate }: HistorySectionProps) 
             className={`p-4 rounded-2xl border text-left transition-all ${
               expanded === s.id
                 ? "bg-orange-950/30 border-orange-900/50"
-                : "bg-white border-neutral-800 hover:border-neutral-700"
+                : "bg-neutral-900 border-neutral-800 hover:border-neutral-700"
             }`}
           >
             <span className="text-lg">{s.icon}</span>
-            <p className="text-sm font-semibold text-neutral-900 mt-1">{s.label}</p>
+            <p className="text-sm font-semibold text-neutral-200 mt-1">{s.label}</p>
             <p className="text-xs text-neutral-400">{s.sub}</p>
           </button>
         ))}
@@ -107,9 +107,9 @@ function ExpandedMedications({ medications, showAdd, onToggleAdd, onAdd, onDelet
   const past = medications.filter((m) => m.endDate);
 
   return (
-    <div className="bg-neutral-900 rounded-2xl border border-neutral-800 p-4 shadow-sm space-y-3">
+    <div className="bg-neutral-900 rounded-2xl border border-neutral-800 p-4 space-y-3">
       <div className="flex items-center justify-between">
-        <h4 className="text-sm font-semibold text-neutral-900">Medications</h4>
+        <h4 className="text-sm font-semibold text-neutral-200">Medications</h4>
         <button onClick={onToggleAdd} className="text-xs text-orange-500 font-medium hover:text-orange-400">
           {showAdd ? "Cancel" : "+ Add"}
         </button>
@@ -152,7 +152,7 @@ function MedItem({ med, onDelete }: { med: Medication; onDelete: () => void }) {
   return (
     <div className="flex items-start justify-between py-2 group">
       <div>
-        <p className="text-sm font-medium text-neutral-900">{med.name}</p>
+        <p className="text-sm font-medium text-neutral-200">{med.name}</p>
         <p className="text-xs text-neutral-500">{[med.dosage, med.frequency].filter(Boolean).join(" · ")}</p>
       </div>
       <button onClick={onDelete} className="text-neutral-300 hover:text-red-500 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">&times;</button>
@@ -170,9 +170,9 @@ function ExpandedSurgeries({ surgeries, showAdd, onToggleAdd, onAdd, onDelete }:
   const [notes, setNotes] = useState("");
 
   return (
-    <div className="bg-neutral-900 rounded-2xl border border-neutral-800 p-4 shadow-sm space-y-3">
+    <div className="bg-neutral-900 rounded-2xl border border-neutral-800 p-4 space-y-3">
       <div className="flex items-center justify-between">
-        <h4 className="text-sm font-semibold text-neutral-900">Surgeries</h4>
+        <h4 className="text-sm font-semibold text-neutral-200">Surgeries</h4>
         <button onClick={onToggleAdd} className="text-xs text-orange-500 font-medium hover:text-orange-400">
           {showAdd ? "Cancel" : "+ Add"}
         </button>
@@ -192,7 +192,7 @@ function ExpandedSurgeries({ surgeries, showAdd, onToggleAdd, onAdd, onDelete }:
       {surgeries.map((s) => (
         <div key={s.id} className="flex items-start justify-between py-2 group">
           <div>
-            <p className="text-sm font-medium text-neutral-900">{s.name}</p>
+            <p className="text-sm font-medium text-neutral-200">{s.name}</p>
             <p className="text-xs text-neutral-500">{[s.date && new Date(s.date).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" }), s.hospital].filter(Boolean).join(" · ")}</p>
           </div>
           <button onClick={() => onDelete(s.id)} className="text-neutral-300 hover:text-red-500 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">&times;</button>
@@ -211,12 +211,12 @@ function ExpandedAllergies({ allergies, showAdd, onToggleAdd, onAdd, onDelete }:
   const [reaction, setReaction] = useState("");
   const [notes, setNotes] = useState("");
 
-  const severityColors = { mild: "bg-green-100 text-green-700", moderate: "bg-yellow-100 text-yellow-700", severe: "bg-red-100 text-red-700" };
+  const severityColors = { mild: "bg-green-950 text-green-400", moderate: "bg-yellow-950 text-yellow-400", severe: "bg-red-950 text-red-400" };
 
   return (
-    <div className="bg-neutral-900 rounded-2xl border border-neutral-800 p-4 shadow-sm space-y-3">
+    <div className="bg-neutral-900 rounded-2xl border border-neutral-800 p-4 space-y-3">
       <div className="flex items-center justify-between">
-        <h4 className="text-sm font-semibold text-neutral-900">Allergies</h4>
+        <h4 className="text-sm font-semibold text-neutral-200">Allergies</h4>
         <button onClick={onToggleAdd} className="text-xs text-orange-500 font-medium hover:text-orange-400">
           {showAdd ? "Cancel" : "+ Add"}
         </button>
@@ -238,7 +238,7 @@ function ExpandedAllergies({ allergies, showAdd, onToggleAdd, onAdd, onDelete }:
       {allergies.map((a) => (
         <div key={a.id} className="flex items-start justify-between py-2 group">
           <div className="flex items-center gap-2">
-            <p className="text-sm font-medium text-neutral-900">{a.name}</p>
+            <p className="text-sm font-medium text-neutral-200">{a.name}</p>
             <span className={`px-2 py-0.5 text-xs rounded-full capitalize ${severityColors[a.severity]}`}>{a.severity}</span>
           </div>
           <button onClick={() => onDelete(a.id)} className="text-neutral-300 hover:text-red-500 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">&times;</button>

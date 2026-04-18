@@ -240,7 +240,7 @@ export default function LinksSection({ data, onUpdate }: LinksSectionProps) {
               >
                 {fileData ? (
                   <div>
-                    <p className="text-sm font-medium text-neutral-900">{fileName}</p>
+                    <p className="text-sm font-medium text-neutral-200">{fileName}</p>
                     <p className="text-xs text-neutral-400 mt-1">Click to change file</p>
                   </div>
                 ) : (
@@ -307,7 +307,7 @@ export default function LinksSection({ data, onUpdate }: LinksSectionProps) {
                 {link.fileData ? (
                   <button
                     onClick={() => handleOpenFile(link)}
-                    className="text-sm font-medium text-neutral-900 hover:text-orange-600 transition-colors text-left"
+                    className="text-sm font-medium text-neutral-200 hover:text-orange-600 transition-colors text-left"
                   >
                     {link.title}
                     <span className="ml-1.5 text-xs text-neutral-400 font-normal">{link.fileName}</span>
@@ -317,7 +317,7 @@ export default function LinksSection({ data, onUpdate }: LinksSectionProps) {
                     href={link.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-sm font-medium text-neutral-900 hover:text-orange-600 transition-colors"
+                    className="text-sm font-medium text-neutral-200 hover:text-orange-600 transition-colors"
                   >
                     {link.title}
                     <span className="text-neutral-300 ml-1">↗</span>
