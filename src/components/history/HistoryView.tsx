@@ -236,7 +236,7 @@ function MedicationCard({ med, onDelete }: { med: Medication; onDelete: () => vo
           </p>
           {med.notes && <p className="text-sm text-gray-500 mt-1">{med.notes}</p>}
         </div>
-        <button onClick={onDelete} className="text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity text-lg">&times;</button>
+        <button onClick={onDelete} className="text-gray-300 hover:text-red-500 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity text-lg">&times;</button>
       </div>
     </div>
   );
@@ -247,7 +247,7 @@ function SurgeryList({ surgeries, onDelete }: { surgeries: Surgery[]; onDelete: 
     return <p className="text-sm text-gray-400 text-center py-8">No surgeries recorded yet.</p>;
   }
 
-  const sorted = [...surgeries].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  const sorted = [...surgeries].sort((a, b) => (b.date ? new Date(b.date).getTime() : 0) - (a.date ? new Date(a.date).getTime() : 0));
 
   return (
     <div className="space-y-2">
@@ -262,7 +262,7 @@ function SurgeryList({ surgeries, onDelete }: { surgeries: Surgery[]; onDelete: 
               </p>
               {s.notes && <p className="text-sm text-gray-500 mt-1">{s.notes}</p>}
             </div>
-            <button onClick={() => onDelete(s.id)} className="text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity text-lg">&times;</button>
+            <button onClick={() => onDelete(s.id)} className="text-gray-300 hover:text-red-500 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity text-lg">&times;</button>
           </div>
         </div>
       ))}
@@ -294,7 +294,7 @@ function AllergyList({ allergies, onDelete }: { allergies: Allergy[]; onDelete: 
               {a.reaction && <p className="text-sm text-gray-500 mt-1">Reaction: {a.reaction}</p>}
               {a.notes && <p className="text-sm text-gray-500 mt-1">{a.notes}</p>}
             </div>
-            <button onClick={() => onDelete(a.id)} className="text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity text-lg">&times;</button>
+            <button onClick={() => onDelete(a.id)} className="text-gray-300 hover:text-red-500 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity text-lg">&times;</button>
           </div>
         </div>
       ))}

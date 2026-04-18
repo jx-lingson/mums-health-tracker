@@ -98,7 +98,7 @@ export default function BodyView({ data, onUpdate }: BodyViewProps) {
             Click anywhere on the body to place a marker
           </div>
         )}
-        <div className="relative flex justify-center w-full">
+        <div className="relative inline-block">
           <BodySvg
             selectedPart={sidePanel?.type === "part" ? sidePanel.partId : null}
             onPartClick={handlePartClick}
@@ -134,6 +134,7 @@ export default function BodyView({ data, onUpdate }: BodyViewProps) {
         )}
         {sidePanel?.type === "part" && (
           <BodyPartPanel
+            key={sidePanel.partId}
             partId={sidePanel.partId}
             entry={data.bodyParts[sidePanel.partId]}
             onAddNote={handleAddNote}
@@ -149,6 +150,7 @@ export default function BodyView({ data, onUpdate }: BodyViewProps) {
         )}
         {sidePanel?.type === "edit-marker" && (
           <MarkerForm
+            key={sidePanel.marker.id}
             marker={sidePanel.marker}
             onSave={handleUpdateMarker}
             onDelete={handleDeleteMarker}

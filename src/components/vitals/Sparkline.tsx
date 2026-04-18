@@ -2,14 +2,14 @@
 
 interface SparklineProps {
   values: number[];
-  width?: number;
-  height?: number;
   color?: string;
 }
 
-export default function Sparkline({ values, width = 200, height = 50, color = "#3B82F6" }: SparklineProps) {
+export default function Sparkline({ values, color = "#3B82F6" }: SparklineProps) {
   if (values.length < 2) return null;
 
+  const width = 200;
+  const height = 50;
   const min = Math.min(...values);
   const max = Math.max(...values);
   const range = max - min || 1;
@@ -22,7 +22,7 @@ export default function Sparkline({ values, width = 200, height = 50, color = "#
   });
 
   return (
-    <svg width={width} height={height} className="inline-block">
+    <svg viewBox={`0 0 ${width} ${height}`} className="w-full max-w-[500px] h-auto">
       <polyline
         points={points.join(" ")}
         fill="none"

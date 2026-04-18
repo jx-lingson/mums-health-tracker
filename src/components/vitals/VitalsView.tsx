@@ -28,7 +28,7 @@ export default function VitalsView({ data, onUpdate }: VitalsViewProps) {
       type: selectedType,
       value: value.trim(),
       unit: vitalDef.unit,
-      date: new Date(date).toISOString(),
+      date: date,
     };
     onUpdate((prev) => ({ ...prev, vitals: [...prev.vitals, reading] }));
     setValue("");
@@ -93,7 +93,7 @@ export default function VitalsView({ data, onUpdate }: VitalsViewProps) {
       {sparklineValues.length >= 2 && (
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
           <h4 className="text-sm font-medium text-gray-500 mb-3">Trend</h4>
-          <Sparkline values={sparklineValues} width={500} height={60} />
+          <Sparkline values={sparklineValues} />
         </div>
       )}
 
@@ -121,7 +121,7 @@ export default function VitalsView({ data, onUpdate }: VitalsViewProps) {
                   <td className="p-3 text-right">
                     <button
                       onClick={() => handleDelete(r.id)}
-                      className="text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                      className="text-gray-300 hover:text-red-500 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
                     >
                       &times;
                     </button>

@@ -24,8 +24,6 @@ export const BODY_PARTS: BodyPartDef[] = [
   { id: "right-lower-leg", label: "Right Lower Leg" },
   { id: "left-foot", label: "Left Foot" },
   { id: "right-foot", label: "Right Foot" },
-  { id: "upper-back", label: "Upper Back" },
-  { id: "lower-back", label: "Lower Back" },
 ];
 
 export interface VitalTypeDef {

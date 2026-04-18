@@ -59,7 +59,7 @@ export default function BodyPartPanel({ partId, entry, onAddNote, onDeleteNote, 
                 <p className="text-sm text-gray-700 flex-1">{note.text}</p>
                 <button
                   onClick={() => onDeleteNote(partId, note.id)}
-                  className="text-gray-300 hover:text-red-500 ml-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="text-gray-300 hover:text-red-500 ml-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
                 >
                   &times;
                 </button>
