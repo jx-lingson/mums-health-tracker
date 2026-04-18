@@ -15,19 +15,7 @@ interface DockProps {
 }
 
 export default function Dock({ items }: DockProps) {
-  const [mouseX, setMouseX] = useState<number | null>(null);
   const dockRef = useRef<HTMLDivElement>(null);
-
-  const handleMouseMove = useCallback((e: React.MouseEvent | React.TouchEvent) => {
-    if (!dockRef.current) return;
-    const rect = dockRef.current.getBoundingClientRect();
-    const clientX = "touches" in e ? e.touches[0].clientX : e.clientX;
-    setMouseX(clientX - rect.left);
-  }, []);
-
-  const handleMouseLeave = useCallback(() => {
-    setMouseX(null);
-  }, []);
 
   return (
     <>
@@ -38,26 +26,13 @@ export default function Dock({ items }: DockProps) {
       <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden px-4 pb-4">
         <div
           ref={dockRef}
-          onMouseMove={handleMouseMove}
-          onMouseLeave={handleMouseLeave}
-          onTouchMove={handleMouseMove}
-          onTouchEnd={handleMouseLeave}
           className="flex items-end justify-around px-4 py-2.5 bg-neutral-900/80 backdrop-blur-xl border border-neutral-700/50 rounded-2xl shadow-2xl"
         >
-          {items.map((item, index) => {
-            const itemCenter = 16 + index * 68 + 26; // approximate center of each item
-            let scale = 1;
-            if (mouseX !== null) {
-              const distance = Math.abs(mouseX - itemCenter);
-              scale = Math.max(1, 1.5 - distance / 100);
-            }
-
-            return (
+          {items.map((item) => (
               <button
                 key={item.id}
                 onClick={item.onClick}
-                className="flex flex-col items-center gap-1 transition-transform duration-150 ease-out origin-bottom"
-                style={{ transform: `scale(${scale})` }}
+                className="flex flex-col items-center gap-1"
               >
                 <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-lg transition-colors ${
                   item.active
@@ -72,8 +47,7 @@ export default function Dock({ items }: DockProps) {
                   {item.label}
                 </span>
               </button>
-            );
-          })}
+          ))}
         </div>
       </div>
     </>
