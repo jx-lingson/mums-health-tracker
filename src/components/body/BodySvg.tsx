@@ -5,6 +5,7 @@ interface BodySvgProps {
   onPartClick: (partId: string) => void;
   isPlacingMarker: boolean;
   onMarkerPlace: (x: number, y: number) => void;
+  markerCounts?: Record<string, number>;
 }
 
 interface BodyRegion {
@@ -106,7 +107,7 @@ const bodyRegions: BodyRegion[] = [
   },
 ];
 
-export default function BodySvg({ selectedPart, onPartClick, isPlacingMarker, onMarkerPlace }: BodySvgProps) {
+export default function BodySvg({ selectedPart, onPartClick, isPlacingMarker, onMarkerPlace, markerCounts }: BodySvgProps) {
   function handleSvgClick(e: React.MouseEvent<SVGSVGElement>) {
     if (!isPlacingMarker) return;
     const svg = e.currentTarget;
@@ -119,39 +120,63 @@ export default function BodySvg({ selectedPart, onPartClick, isPlacingMarker, on
   return (
     <svg
       viewBox="0 0 300 455"
-      className={`w-full max-w-[340px] h-auto ${isPlacingMarker ? "cursor-crosshair" : ""}`}
+      className={`w-full max-w-[280px] h-auto ${isPlacingMarker ? "cursor-crosshair" : ""}`}
       onClick={handleSvgClick}
     >
       <defs>
         <linearGradient id="bodyGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stopColor="#e2e8f0" />
-          <stop offset="100%" stopColor="#cbd5e1" />
+          <stop offset="0%" stopColor="#d6d3d1" />
+          <stop offset="100%" stopColor="#a8a29e" />
+        </linearGradient>
+        <linearGradient id="bodyGradientHover" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stopColor="#fed7aa" />
+          <stop offset="100%" stopColor="#fdba74" />
+        </linearGradient>
+        <linearGradient id="bodyGradientSelected" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stopColor="#fb923c" />
+          <stop offset="100%" stopColor="#ea580c" />
         </linearGradient>
       </defs>
-      {bodyRegions.map((region) => (
-        <path
-          key={region.id}
-          d={region.d}
-          fill={selectedPart === region.id ? "#93c5fd" : "url(#bodyGradient)"}
-          className={`
-            transition-colors duration-150
-            ${selectedPart === region.id
-              ? "stroke-blue-400"
-              : "hover:fill-blue-100 stroke-slate-300"
+      {bodyRegions.map((region) => {
+        const hasMarkers = markerCounts && markerCounts[region.id] > 0;
+        return (
+          <path
+            key={region.id}
+            d={region.d}
+            fill={
+              selectedPart === region.id
+                ? "url(#bodyGradientSelected)"
+                : hasMarkers
+                ? "#d6d3d1"
+                : "url(#bodyGradient)"
             }
-            ${isPlacingMarker ? "pointer-events-none" : "cursor-pointer"}
-          `}
-          strokeWidth={0.5}
-          strokeLinejoin="round"
-          onClick={(e) => {
-            if (isPlacingMarker) return;
-            e.stopPropagation();
-            onPartClick(region.id);
-          }}
-        >
-          <title>{region.label}</title>
-        </path>
-      ))}
+            className={`
+              transition-colors duration-150
+              ${selectedPart === region.id ? "stroke-orange-600" : hasMarkers ? "stroke-orange-300" : "stroke-stone-400"}
+              ${isPlacingMarker ? "pointer-events-none" : "cursor-pointer"}
+            `}
+            strokeWidth={selectedPart === region.id ? 1.5 : 0.5}
+            strokeLinejoin="round"
+            onMouseEnter={(e) => {
+              if (!isPlacingMarker && selectedPart !== region.id) {
+                e.currentTarget.setAttribute("fill", "url(#bodyGradientHover)");
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (!isPlacingMarker && selectedPart !== region.id) {
+                e.currentTarget.setAttribute("fill", hasMarkers ? "#d6d3d1" : "url(#bodyGradient)");
+              }
+            }}
+            onClick={(e) => {
+              if (isPlacingMarker) return;
+              e.stopPropagation();
+              onPartClick(region.id);
+            }}
+          >
+            <title>{region.label}</title>
+          </path>
+        );
+      })}
     </svg>
   );
 }

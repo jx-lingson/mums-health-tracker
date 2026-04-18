@@ -8,8 +8,8 @@ const geist = Geist({
 });
 
 export const metadata: Metadata = {
-  title: "Mum's Health Tracker",
-  description: "Track health, vitals, and medical history",
+  title: "Chinn Health Tracker",
+  description: "Health tracking dashboard",
 };
 
 export default function RootLayout({

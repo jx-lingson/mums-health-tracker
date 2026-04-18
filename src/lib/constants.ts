@@ -1,5 +1,22 @@
 import { VitalType } from "./types";
 
+export const MUM_DOB = new Date(1972, 8, 2); // September 2, 1972
+
+export function calculateAge(dob: Date): { years: number; months: number } {
+  const now = new Date();
+  let years = now.getFullYear() - dob.getFullYear();
+  let months = now.getMonth() - dob.getMonth();
+  if (months < 0 || (months === 0 && now.getDate() < dob.getDate())) {
+    years--;
+    months += 12;
+  }
+  if (now.getDate() < dob.getDate()) {
+    months--;
+    if (months < 0) months += 12;
+  }
+  return { years, months };
+}
+
 export interface BodyPartDef {
   id: string;
   label: string;
