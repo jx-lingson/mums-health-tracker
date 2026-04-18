@@ -13,6 +13,27 @@ import VitalCard from "./vitals/VitalCard";
 import HistorySection from "./history/HistorySection";
 import LinksSection from "./LinksSection";
 
+const BODY_PART_CENTERS: Record<string, [number, number]> = {
+  head: [150, 52], neck: [150, 97], "left-shoulder": [125, 111], "right-shoulder": [175, 111],
+  chest: [150, 145], abdomen: [150, 200], "left-upper-arm": [105, 140], "right-upper-arm": [195, 140],
+  "left-forearm": [103, 210], "right-forearm": [197, 210], "left-hand": [97, 265], "right-hand": [203, 265],
+  "left-upper-leg": [137, 280], "right-upper-leg": [163, 280], "left-lower-leg": [135, 370], "right-lower-leg": [165, 370],
+  "left-foot": [132, 430], "right-foot": [168, 430],
+};
+
+function getClosestBodyPart(x: number, y: number): string | null {
+  let closest: string | null = null;
+  let minDist = Infinity;
+  for (const [id, [cx, cy]] of Object.entries(BODY_PART_CENTERS)) {
+    const dist = Math.sqrt((x - cx) ** 2 + (y - cy) ** 2);
+    if (dist < minDist && dist < 60) {
+      minDist = dist;
+      closest = id;
+    }
+  }
+  return closest;
+}
+
 type Modal =
   | { type: "part"; partId: string }
   | { type: "new-marker"; x: number; y: number }
@@ -109,7 +130,11 @@ export default function Dashboard() {
 
   const markerCounts: Record<string, number> = {};
   Object.entries(data.bodyParts).forEach(([partId, entry]) => {
-    if (entry.notes.length > 0) markerCounts[partId] = entry.notes.length;
+    if (entry.notes.length > 0) markerCounts[partId] = (markerCounts[partId] || 0) + entry.notes.length;
+  });
+  data.markers.forEach((m) => {
+    const partId = getClosestBodyPart(m.x, m.y);
+    if (partId) markerCounts[partId] = (markerCounts[partId] || 0) + 1;
   });
 
   return (

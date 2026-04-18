@@ -138,7 +138,11 @@ export default function BodySvg({ selectedPart, onPartClick, isPlacingMarker, on
         </linearGradient>
       </defs>
       {bodyRegions.map((region) => {
-        const hasMarkers = markerCounts && markerCounts[region.id] > 0;
+        const count = (markerCounts && markerCounts[region.id]) || 0;
+        const intensity = count > 0 ? Math.min(count / 5, 1) : 0; // saturates at 5 markers
+        const heatColor = intensity > 0
+          ? `rgba(234, 88, 12, ${0.15 + intensity * 0.55})` // orange-600 at varying opacity
+          : "";
         return (
           <path
             key={region.id}
@@ -146,16 +150,16 @@ export default function BodySvg({ selectedPart, onPartClick, isPlacingMarker, on
             fill={
               selectedPart === region.id
                 ? "url(#bodyGradientSelected)"
-                : hasMarkers
-                ? "#d6d3d1"
+                : intensity > 0
+                ? heatColor
                 : "url(#bodyGradient)"
             }
             className={`
               transition-colors duration-150
-              ${selectedPart === region.id ? "stroke-orange-600" : hasMarkers ? "stroke-orange-300" : "stroke-stone-400"}
+              ${selectedPart === region.id ? "stroke-orange-600" : intensity > 0 ? "stroke-orange-400" : "stroke-stone-400"}
               ${isPlacingMarker ? "pointer-events-none" : "cursor-pointer"}
             `}
-            strokeWidth={selectedPart === region.id ? 1.5 : 0.5}
+            strokeWidth={selectedPart === region.id ? 1.5 : intensity > 0 ? 1 : 0.5}
             strokeLinejoin="round"
             onMouseEnter={(e) => {
               if (!isPlacingMarker && selectedPart !== region.id) {
@@ -164,7 +168,7 @@ export default function BodySvg({ selectedPart, onPartClick, isPlacingMarker, on
             }}
             onMouseLeave={(e) => {
               if (!isPlacingMarker && selectedPart !== region.id) {
-                e.currentTarget.setAttribute("fill", hasMarkers ? "#d6d3d1" : "url(#bodyGradient)");
+                e.currentTarget.setAttribute("fill", intensity > 0 ? heatColor : "url(#bodyGradient)");
               }
             }}
             onClick={(e) => {
