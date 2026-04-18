@@ -137,6 +137,10 @@ export default function LinksSection({ data, onUpdate }: LinksSectionProps) {
     handleSaveAndExtract(link);
   }
 
+  function handleEdit(updated: SavedLink) {
+    onUpdate((prev) => ({ ...prev, links: (prev.links || []).map((l) => l.id === updated.id ? updated : l) }));
+  }
+
   function handleDelete(id: string) {
     onUpdate((prev) => ({ ...prev, links: (prev.links || []).filter((l) => l.id !== id) }));
   }
@@ -304,36 +308,80 @@ export default function LinksSection({ data, onUpdate }: LinksSectionProps) {
       ) : (
         <div className="space-y-2">
           {sorted.map((link) => (
-            <div key={link.id} className="flex items-start gap-3 p-3 rounded-xl hover:bg-neutral-800/50 transition-colors group">
-              <span className="text-base mt-0.5">{catIcon[link.category]}</span>
-              <div className="flex-1 min-w-0">
-                {link.fileData ? (
-                  <button onClick={() => handleOpenFile(link)}
-                    className="text-sm font-medium text-neutral-200 hover:text-orange-400 transition-colors text-left">
-                    {link.title}
-                    <span className="ml-1.5 text-xs text-neutral-600 font-normal">{link.fileName}</span>
-                  </button>
-                ) : link.url ? (
-                  <a href={link.url} target="_blank" rel="noopener noreferrer"
-                    className="text-sm font-medium text-neutral-200 hover:text-orange-400 transition-colors">
-                    {link.title}<span className="text-neutral-600 ml-1">↗</span>
-                  </a>
-                ) : (
-                  <p className="text-sm font-medium text-neutral-200">{link.title}</p>
-                )}
-                <div className="flex items-center gap-2 mt-0.5">
-                  <span className="text-xs text-neutral-600">
-                    {new Date(link.date).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })}
-                  </span>
-                  {link.notes && <span className="text-xs text-neutral-600">· {link.notes}</span>}
-                </div>
-              </div>
-              <button onClick={() => handleDelete(link.id)}
-                className="text-neutral-700 hover:text-red-400 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity text-lg">&times;</button>
-            </div>
+            <LinkItem key={link.id} link={link} catIcon={catIcon} onEdit={handleEdit} onDelete={() => handleDelete(link.id)} onOpenFile={handleOpenFile} />
           ))}
         </div>
       )}
+    </div>
+  );
+}
+
+function LinkItem({ link, catIcon, onEdit, onDelete, onOpenFile }: {
+  link: SavedLink; catIcon: Record<string, string>;
+  onEdit: (l: SavedLink) => void; onDelete: () => void; onOpenFile: (l: SavedLink) => void;
+}) {
+  const [editing, setEditing] = useState(false);
+  const [title, setTitle] = useState(link.title);
+  const [date, setDate] = useState(new Date(link.date).toISOString().split("T")[0]);
+  const [notes, setNotes] = useState(link.notes);
+  const [url, setUrl] = useState(link.url);
+
+  if (editing) {
+    return (
+      <div className="bg-neutral-800/50 rounded-xl p-3 space-y-2">
+        <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Title"
+          className="w-full bg-neutral-800 border border-neutral-700 rounded-lg p-2 text-sm text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-orange-500" />
+        <div className="flex gap-2">
+          <input type="date" value={date} onChange={(e) => setDate(e.target.value)}
+            className="flex-1 bg-neutral-800 border border-neutral-700 rounded-lg p-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-orange-500" />
+          {!link.fileData && (
+            <input type="url" value={url} onChange={(e) => setUrl(e.target.value)} placeholder="Link"
+              className="flex-1 bg-neutral-800 border border-neutral-700 rounded-lg p-2 text-sm text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-orange-500" />
+          )}
+        </div>
+        <textarea value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Notes" rows={2}
+          className="w-full bg-neutral-800 border border-neutral-700 rounded-lg p-2 text-sm text-white resize-none placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-orange-500" />
+        <div className="flex gap-2">
+          <button onClick={() => { onEdit({ ...link, title, date: new Date(date + "T12:00:00").toISOString(), notes, url }); setEditing(false); }}
+            className="px-3 py-1 bg-orange-600 text-white text-xs rounded-lg hover:bg-orange-500">Save</button>
+          <button onClick={() => { setEditing(false); setTitle(link.title); setDate(new Date(link.date).toISOString().split("T")[0]); setNotes(link.notes); setUrl(link.url); }}
+            className="px-3 py-1 text-neutral-400 text-xs rounded-lg hover:bg-neutral-800">Cancel</button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex items-start gap-3 p-3 rounded-xl hover:bg-neutral-800/50 transition-colors group">
+      <span className="text-base mt-0.5">{catIcon[link.category]}</span>
+      <div className="flex-1 min-w-0">
+        {link.fileData ? (
+          <button onClick={() => onOpenFile(link)}
+            className="text-sm font-medium text-neutral-200 hover:text-orange-400 transition-colors text-left">
+            {link.title}
+            <span className="ml-1.5 text-xs text-neutral-600 font-normal">{link.fileName}</span>
+          </button>
+        ) : link.url ? (
+          <a href={link.url} target="_blank" rel="noopener noreferrer"
+            className="text-sm font-medium text-neutral-200 hover:text-orange-400 transition-colors">
+            {link.title}<span className="text-neutral-600 ml-1">↗</span>
+          </a>
+        ) : (
+          <p className="text-sm font-medium text-neutral-200">{link.title}</p>
+        )}
+        <div className="flex items-center gap-2 mt-0.5">
+          <span className="text-xs text-neutral-600">
+            {new Date(link.date).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })}
+          </span>
+          {link.notes && <span className="text-xs text-neutral-600">· {link.notes}</span>}
+        </div>
+      </div>
+      <div className="flex items-center gap-1">
+        <button onClick={() => setEditing(true)}
+          className="text-neutral-700 hover:text-orange-400 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity text-xs">Edit</button>
+        <button onClick={onDelete}
+          className="text-neutral-700 hover:text-red-400 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity text-lg">&times;</button>
+      </div>
     </div>
   );
 }
