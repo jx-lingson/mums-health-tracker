@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { HealthData, SavedLink } from "@/lib/types";
 
 interface LinksSectionProps {
@@ -9,24 +9,64 @@ interface LinksSectionProps {
 }
 
 const categories = [
-  { id: "consult" as const, label: "Consult Recordings", icon: "🎙️", description: "Granola links, call recordings" },
-  { id: "referral" as const, label: "Referrals", icon: "📋", description: "Specialist referral letters" },
-  { id: "document" as const, label: "Medical Documents", icon: "📄", description: "Test results, histories, reports" },
+  { id: "consult" as const, label: "Consult Recordings", icon: "🎙️" },
+  { id: "referral" as const, label: "Referrals", icon: "📋" },
+  { id: "document" as const, label: "Medical Documents", icon: "📄" },
 ];
+
+type AddMode = "link" | "file";
 
 export default function LinksSection({ data, onUpdate }: LinksSectionProps) {
   const [showAdd, setShowAdd] = useState(false);
+  const [addMode, setAddMode] = useState<AddMode>("link");
   const [title, setTitle] = useState("");
   const [url, setUrl] = useState("");
   const [category, setCategory] = useState<"consult" | "referral" | "document">("consult");
   const [notes, setNotes] = useState("");
+  const [fileData, setFileData] = useState<string | null>(null);
+  const [fileName, setFileName] = useState("");
+  const [fileType, setFileType] = useState("");
+  const [fileError, setFileError] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [filterCat, setFilterCat] = useState<"all" | "consult" | "referral" | "document">("all");
 
   const links = data.links || [];
   const filtered = filterCat === "all" ? links : links.filter((l) => l.category === filterCat);
   const sorted = [...filtered].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
-  function handleSubmit(e: React.FormEvent) {
+  function resetForm() {
+    setTitle("");
+    setUrl("");
+    setNotes("");
+    setFileData(null);
+    setFileName("");
+    setFileType("");
+    setFileError("");
+    setShowAdd(false);
+  }
+
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 4 * 1024 * 1024) {
+      setFileError("File must be under 4MB");
+      return;
+    }
+
+    setFileError("");
+    setFileName(file.name);
+    setFileType(file.type);
+    if (!title) setTitle(file.name.replace(/\.[^.]+$/, ""));
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      setFileData(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function handleSubmitLink(e: React.FormEvent) {
     e.preventDefault();
     if (!title.trim() || !url.trim()) return;
     const link: SavedLink = {
@@ -38,17 +78,46 @@ export default function LinksSection({ data, onUpdate }: LinksSectionProps) {
       notes: notes.trim(),
     };
     onUpdate((prev) => ({ ...prev, links: [...(prev.links || []), link] }));
-    setTitle("");
-    setUrl("");
-    setNotes("");
-    setShowAdd(false);
+    resetForm();
+  }
+
+  function handleSubmitFile(e: React.FormEvent) {
+    e.preventDefault();
+    if (!title.trim() || !fileData) return;
+    const link: SavedLink = {
+      id: crypto.randomUUID(),
+      title: title.trim(),
+      url: "",
+      category,
+      date: new Date().toISOString(),
+      notes: notes.trim(),
+      fileData,
+      fileName,
+      fileType,
+    };
+    onUpdate((prev) => ({ ...prev, links: [...(prev.links || []), link] }));
+    resetForm();
   }
 
   function handleDelete(id: string) {
     onUpdate((prev) => ({ ...prev, links: (prev.links || []).filter((l) => l.id !== id) }));
   }
 
-  const catIcon = { consult: "🎙️", referral: "📋", document: "📄" };
+  function handleOpenFile(link: SavedLink) {
+    if (link.fileData) {
+      const win = window.open();
+      if (win) {
+        if (link.fileType?.startsWith("image/")) {
+          win.document.write(`<img src="${link.fileData}" style="max-width:100%" />`);
+        } else {
+          win.document.write(`<iframe src="${link.fileData}" style="width:100%;height:100%;border:none" />`);
+        }
+        win.document.title = link.title;
+      }
+    }
+  }
+
+  const catIcon: Record<string, string> = { consult: "🎙️", referral: "📋", document: "📄" };
 
   return (
     <div className="bg-white rounded-2xl border border-stone-200 p-6 shadow-sm">
@@ -78,67 +147,156 @@ export default function LinksSection({ data, onUpdate }: LinksSectionProps) {
           })}
         </div>
         <button
-          onClick={() => setShowAdd(!showAdd)}
+          onClick={() => { setShowAdd(!showAdd); if (showAdd) resetForm(); }}
           className="px-3 py-1.5 text-xs font-medium rounded-lg bg-orange-600 text-white hover:bg-orange-700 transition-colors flex-shrink-0"
         >
-          {showAdd ? "Cancel" : "+ Add Link"}
+          {showAdd ? "Cancel" : "+ Add"}
         </button>
       </div>
 
       {showAdd && (
-        <form onSubmit={handleSubmit} className="space-y-3 pb-4 mb-4 border-b border-stone-100">
-          <input
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="Title (e.g. Dr Smith consult, Knee MRI results)"
-            className="w-full border border-stone-200 rounded-lg p-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
-            autoFocus
-          />
-          <input
-            type="url"
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
-            placeholder="Paste link here..."
-            className="w-full border border-stone-200 rounded-lg p-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
-          />
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-stone-500">Type:</span>
-            {categories.map((c) => (
+        <div className="pb-4 mb-4 border-b border-stone-100">
+          <div className="flex gap-2 mb-3">
+            <button
+              onClick={() => setAddMode("link")}
+              className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
+                addMode === "link" ? "bg-stone-900 text-white" : "bg-stone-100 text-stone-600 hover:bg-stone-200"
+              }`}
+            >
+              Paste Link
+            </button>
+            <button
+              onClick={() => setAddMode("file")}
+              className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
+                addMode === "file" ? "bg-stone-900 text-white" : "bg-stone-100 text-stone-600 hover:bg-stone-200"
+              }`}
+            >
+              Upload File
+            </button>
+          </div>
+
+          {addMode === "link" ? (
+            <form onSubmit={handleSubmitLink} className="space-y-3">
+              <input
+                type="text"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="Title (e.g. Dr Smith consult, Knee MRI results)"
+                className="w-full border border-stone-200 rounded-lg p-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                autoFocus
+              />
+              <input
+                type="url"
+                value={url}
+                onChange={(e) => setUrl(e.target.value)}
+                placeholder="Paste link here..."
+                className="w-full border border-stone-200 rounded-lg p-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+              />
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-xs text-stone-500">Type:</span>
+                {categories.map((c) => (
+                  <button
+                    key={c.id}
+                    type="button"
+                    onClick={() => setCategory(c.id)}
+                    className={`px-3 py-1 text-xs rounded-lg transition-colors ${
+                      category === c.id ? "bg-orange-100 text-orange-700" : "bg-stone-100 text-stone-500"
+                    }`}
+                  >
+                    {c.icon} {c.label}
+                  </button>
+                ))}
+              </div>
+              <textarea
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                placeholder="Notes (optional)"
+                rows={2}
+                className="w-full border border-stone-200 rounded-lg p-2.5 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-orange-500"
+              />
               <button
-                key={c.id}
-                type="button"
-                onClick={() => setCategory(c.id)}
-                className={`px-3 py-1 text-xs rounded-lg transition-colors ${
-                  category === c.id ? "bg-orange-100 text-orange-700" : "bg-stone-100 text-stone-500"
+                type="submit"
+                disabled={!title.trim() || !url.trim()}
+                className="px-4 py-2 bg-orange-600 text-white text-sm font-medium rounded-lg hover:bg-orange-700 disabled:opacity-40 transition-colors"
+              >
+                Save Link
+              </button>
+            </form>
+          ) : (
+            <form onSubmit={handleSubmitFile} className="space-y-3">
+              <input
+                type="text"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="Title"
+                className="w-full border border-stone-200 rounded-lg p-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                autoFocus
+              />
+              <div
+                onClick={() => fileInputRef.current?.click()}
+                className={`border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-colors ${
+                  fileData ? "border-orange-300 bg-orange-50" : "border-stone-200 hover:border-stone-300"
                 }`}
               >
-                {c.icon} {c.label}
+                {fileData ? (
+                  <div>
+                    <p className="text-sm font-medium text-stone-900">{fileName}</p>
+                    <p className="text-xs text-stone-400 mt-1">Click to change file</p>
+                  </div>
+                ) : (
+                  <div>
+                    <p className="text-sm text-stone-500">Click to select a file</p>
+                    <p className="text-xs text-stone-400 mt-1">PDF, images, documents (max 4MB)</p>
+                  </div>
+                )}
+              </div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                onChange={handleFileChange}
+                accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.txt"
+                className="hidden"
+              />
+              {fileError && <p className="text-xs text-red-500">{fileError}</p>}
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-xs text-stone-500">Type:</span>
+                {categories.map((c) => (
+                  <button
+                    key={c.id}
+                    type="button"
+                    onClick={() => setCategory(c.id)}
+                    className={`px-3 py-1 text-xs rounded-lg transition-colors ${
+                      category === c.id ? "bg-orange-100 text-orange-700" : "bg-stone-100 text-stone-500"
+                    }`}
+                  >
+                    {c.icon} {c.label}
+                  </button>
+                ))}
+              </div>
+              <textarea
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                placeholder="Notes (optional)"
+                rows={2}
+                className="w-full border border-stone-200 rounded-lg p-2.5 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-orange-500"
+              />
+              <button
+                type="submit"
+                disabled={!title.trim() || !fileData}
+                className="px-4 py-2 bg-orange-600 text-white text-sm font-medium rounded-lg hover:bg-orange-700 disabled:opacity-40 transition-colors"
+              >
+                Upload File
               </button>
-            ))}
-          </div>
-          <textarea
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-            placeholder="Notes (optional)"
-            rows={2}
-            className="w-full border border-stone-200 rounded-lg p-2.5 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-orange-500"
-          />
-          <button
-            type="submit"
-            disabled={!title.trim() || !url.trim()}
-            className="px-4 py-2 bg-orange-600 text-white text-sm font-medium rounded-lg hover:bg-orange-700 disabled:opacity-40 transition-colors"
-          >
-            Save Link
-          </button>
-        </form>
+            </form>
+          )}
+        </div>
       )}
 
       {sorted.length === 0 ? (
         <p className="text-sm text-stone-400 text-center py-4">
           {links.length === 0
-            ? "No links saved yet. Add Granola consult recordings, referrals, or medical documents."
-            : "No links in this category."}
+            ? "No links or documents saved yet. Add Granola consult recordings, referrals, or upload medical documents."
+            : "No items in this category."}
         </p>
       ) : (
         <div className="space-y-2">
@@ -146,15 +304,25 @@ export default function LinksSection({ data, onUpdate }: LinksSectionProps) {
             <div key={link.id} className="flex items-start gap-3 p-3 rounded-xl hover:bg-stone-50 transition-colors group">
               <span className="text-base mt-0.5">{catIcon[link.category]}</span>
               <div className="flex-1 min-w-0">
-                <a
-                  href={link.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm font-medium text-stone-900 hover:text-orange-600 transition-colors"
-                >
-                  {link.title}
-                  <span className="text-stone-300 ml-1">↗</span>
-                </a>
+                {link.fileData ? (
+                  <button
+                    onClick={() => handleOpenFile(link)}
+                    className="text-sm font-medium text-stone-900 hover:text-orange-600 transition-colors text-left"
+                  >
+                    {link.title}
+                    <span className="ml-1.5 text-xs text-stone-400 font-normal">{link.fileName}</span>
+                  </button>
+                ) : (
+                  <a
+                    href={link.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm font-medium text-stone-900 hover:text-orange-600 transition-colors"
+                  >
+                    {link.title}
+                    <span className="text-stone-300 ml-1">↗</span>
+                  </a>
+                )}
                 <div className="flex items-center gap-2 mt-0.5">
                   <span className="text-xs text-stone-400">
                     {new Date(link.date).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })}

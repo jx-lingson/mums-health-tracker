@@ -15,6 +15,9 @@ export interface SavedLink {
   category: "consult" | "referral" | "document";
   date: string;
   notes: string;
+  fileData?: string;
+  fileName?: string;
+  fileType?: string;
 }
 
 export interface BodyPartEntry {
