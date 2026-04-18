@@ -15,8 +15,14 @@ interface BodyPartPanelProps {
 
 export default function BodyPartPanel({ partId, entry, onAddNote, onEditNote, onDeleteNote, onClose }: BodyPartPanelProps) {
   const [text, setText] = useState("");
+  const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest");
   const part = BODY_PARTS.find((p) => p.id === partId);
   const notes = entry?.notes || [];
+  const sortedNotes = [...notes].sort((a, b) =>
+    sortOrder === "newest"
+      ? new Date(b.date).getTime() - new Date(a.date).getTime()
+      : new Date(a.date).getTime() - new Date(b.date).getTime()
+  );
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -41,7 +47,13 @@ export default function BodyPartPanel({ partId, entry, onAddNote, onEditNote, on
         <p className="text-xs text-neutral-600">No notes yet.</p>
       ) : (
         <div className="space-y-2">
-          {[...notes].reverse().map((note: BodyNote) => (
+          <div className="flex items-center justify-end">
+            <button onClick={() => setSortOrder(sortOrder === "newest" ? "oldest" : "newest")}
+              className="text-xs text-neutral-500 hover:text-neutral-300 transition-colors">
+              {sortOrder === "newest" ? "Newest first ↓" : "Oldest first ↑"}
+            </button>
+          </div>
+          {sortedNotes.map((note: BodyNote) => (
             <NoteItem key={note.id} note={note} partId={partId} onEdit={onEditNote} onDelete={onDeleteNote} />
           ))}
         </div>
