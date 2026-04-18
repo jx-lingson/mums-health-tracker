@@ -27,13 +27,6 @@ export default function HistorySection({ data, onUpdate }: HistorySectionProps) 
       icon: "🏥",
       sub: `${data.surgeries.length} recorded`,
     },
-    {
-      id: "allergies" as const,
-      label: "Allergies",
-      count: data.allergies.length,
-      icon: "⚠️",
-      sub: `${data.allergies.length} recorded`,
-    },
   ];
 
   function toggleSection(id: typeof expanded) {
@@ -43,7 +36,7 @@ export default function HistorySection({ data, onUpdate }: HistorySectionProps) 
 
   return (
     <div>
-      <div className="grid grid-cols-3 gap-3 mb-4">
+      <div className="grid grid-cols-2 gap-3 mb-4">
         {sections.map((s) => (
           <button
             key={s.id}
@@ -79,16 +72,6 @@ export default function HistorySection({ data, onUpdate }: HistorySectionProps) 
           onAdd={(s) => { onUpdate((p) => ({ ...p, surgeries: [...p.surgeries, s] })); setShowAddForm(false); }}
           onEdit={(s) => onUpdate((p) => ({ ...p, surgeries: p.surgeries.map((x) => x.id === s.id ? s : x) }))}
           onDelete={(id) => onUpdate((p) => ({ ...p, surgeries: p.surgeries.filter((s) => s.id !== id) }))}
-        />
-      )}
-      {expanded === "allergies" && (
-        <ExpandedAllergies
-          allergies={data.allergies}
-          showAdd={showAddForm}
-          onToggleAdd={() => setShowAddForm(!showAddForm)}
-          onAdd={(a) => { onUpdate((p) => ({ ...p, allergies: [...p.allergies, a] })); setShowAddForm(false); }}
-          onEdit={(a) => onUpdate((p) => ({ ...p, allergies: p.allergies.map((x) => x.id === a.id ? a : x) }))}
-          onDelete={(id) => onUpdate((p) => ({ ...p, allergies: p.allergies.filter((a) => a.id !== id) }))}
         />
       )}
     </div>
