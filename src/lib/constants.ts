@@ -23,7 +23,8 @@ export interface BodyPartDef {
 }
 
 export const BODY_PARTS: BodyPartDef[] = [
-  { id: "head", label: "Head" },
+  { id: "upper-head", label: "Upper Head" },
+  { id: "lower-head", label: "Lower Head" },
   { id: "neck", label: "Neck" },
   { id: "chest", label: "Chest" },
   { id: "abdomen", label: "Abdomen" },

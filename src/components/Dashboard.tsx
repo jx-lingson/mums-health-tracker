@@ -14,7 +14,7 @@ import LinksSection from "./LinksSection";
 import Dock from "./Dock";
 
 const BODY_PART_CENTERS: Record<string, [number, number]> = {
-  head: [150, 52], neck: [150, 97], "left-shoulder": [125, 111], "right-shoulder": [175, 111],
+  "upper-head": [150, 35], "lower-head": [150, 70], neck: [150, 97], "left-shoulder": [125, 111], "right-shoulder": [175, 111],
   chest: [150, 145], abdomen: [150, 200], "left-upper-arm": [105, 140], "right-upper-arm": [195, 140],
   "left-forearm": [103, 210], "right-forearm": [197, 210], "left-hand": [97, 265], "right-hand": [203, 265],
   "left-upper-leg": [137, 280], "right-upper-leg": [163, 280], "left-lower-leg": [135, 370], "right-lower-leg": [165, 370],

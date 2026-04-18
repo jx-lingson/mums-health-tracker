@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 const client = new Anthropic();
 
 const BODY_PARTS = [
-  "head", "neck", "left-shoulder", "right-shoulder", "chest", "abdomen",
+  "upper-head", "lower-head", "neck", "left-shoulder", "right-shoulder", "chest", "abdomen",
   "left-upper-arm", "right-upper-arm", "left-forearm", "right-forearm",
   "left-hand", "right-hand", "left-upper-leg", "right-upper-leg",
   "left-lower-leg", "right-lower-leg", "left-foot", "right-foot",
@@ -14,7 +14,8 @@ const SYSTEM_PROMPT = `You are a medical document analyzer. Given a medical docu
 
 For each abnormal finding:
 1. Map it to the most relevant body part from this list: ${BODY_PARTS.join(", ")}
-   - Use "head" for brain, eyes, ears, dental, thyroid issues
+   - Use "upper-head" for brain, skull, neurological issues
+   - Use "lower-head" for eyes, ears, dental, jaw, face issues
    - Use "chest" for heart, lungs, respiratory issues
    - Use "abdomen" for digestive, liver, kidney, intestinal issues
    - Use "neck" for thyroid, throat issues
