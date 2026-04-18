@@ -35,14 +35,14 @@ export default function Dock({ items }: DockProps) {
       <div className="h-24 md:hidden" />
 
       {/* Dock */}
-      <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 md:hidden">
+      <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden px-4 pb-4">
         <div
           ref={dockRef}
           onMouseMove={handleMouseMove}
           onMouseLeave={handleMouseLeave}
           onTouchMove={handleMouseMove}
           onTouchEnd={handleMouseLeave}
-          className="flex items-end gap-1.5 px-3 py-2.5 bg-neutral-900/80 backdrop-blur-xl border border-neutral-700/50 rounded-2xl shadow-2xl"
+          className="flex items-end justify-around px-4 py-2.5 bg-neutral-900/80 backdrop-blur-xl border border-neutral-700/50 rounded-2xl shadow-2xl"
         >
           {items.map((item, index) => {
             const itemCenter = 16 + index * 68 + 26; // approximate center of each item
