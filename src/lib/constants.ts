@@ -52,9 +52,6 @@ export interface VitalTypeDef {
 
 export const VITAL_TYPES: VitalTypeDef[] = [
   { id: "blood-pressure", label: "Blood Pressure", unit: "mmHg", placeholder: "120/80" },
-  { id: "heart-rate", label: "Heart Rate", unit: "bpm", placeholder: "72" },
   { id: "weight", label: "Weight", unit: "kg", placeholder: "65" },
-  { id: "temperature", label: "Temperature", unit: "°C", placeholder: "36.6" },
   { id: "blood-cell-count", label: "Blood Cell Count", unit: "cells/mcL", placeholder: "5000" },
-  { id: "oxygen-saturation", label: "Oxygen Saturation", unit: "%", placeholder: "98" },
 ];
