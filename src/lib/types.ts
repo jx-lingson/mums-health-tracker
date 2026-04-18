@@ -28,6 +28,7 @@ export interface BodyNote {
   id: string;
   text: string;
   date: string;
+  source?: "manual" | "extracted";
 }
 
 export interface Marker {

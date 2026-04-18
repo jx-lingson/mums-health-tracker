@@ -102,6 +102,7 @@ export default function LinksSection({ data, onUpdate }: LinksSectionProps) {
                     id: crypto.randomUUID(),
                     text: finding.note,
                     date: docDate + "T12:00:00.000Z",
+                    source: "extracted" as const,
                   }],
                 };
               }

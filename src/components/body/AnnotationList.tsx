@@ -28,6 +28,7 @@ interface AnnotationItem {
   date: string;
   partId?: string;
   marker?: Marker;
+  source?: "manual" | "extracted";
 }
 
 type SortOrder = "newest" | "oldest";
@@ -43,7 +44,7 @@ export default function AnnotationList({ data, onMarkerClick, onPartClick, marke
   Object.entries(data.bodyParts).forEach(([partId, entry]) => {
     const part = BODY_PARTS.find((p) => p.id === partId);
     entry.notes.forEach((note: BodyNote) => {
-      items.push({ type: "note", id: note.id, label: part?.label || partId, text: note.text, date: note.date, partId });
+      items.push({ type: "note", id: note.id, label: part?.label || partId, text: note.text, date: note.date, partId, source: note.source });
     });
   });
   items.sort((a, b) => sortOrder === "newest"
@@ -79,7 +80,11 @@ export default function AnnotationList({ data, onMarkerClick, onPartClick, marke
               style={{ backgroundColor: getIntensityColor(item.partId ? (markerCounts?.[item.partId] || 1) : 1) }} />
             <div className="flex-1 min-w-0">
               <div className="flex items-center justify-between gap-2">
-                <span className="text-sm font-medium text-neutral-200 truncate">{item.label}</span>
+                <span className="text-sm font-medium text-neutral-200 truncate">
+                  {item.label}
+                  {item.source === "extracted" && <span className="ml-1.5 text-[10px] font-medium text-orange-500/70 uppercase">auto</span>}
+                  {(item.source === "manual" || (!item.source && item.type === "note")) && <span className="ml-1.5 text-[10px] font-medium text-green-500/70 uppercase">manual</span>}
+                </span>
                 <span className="text-xs text-neutral-600 flex-shrink-0">
                   {new Date(item.date).toLocaleDateString("en-AU", { day: "numeric", month: "short" })}
                 </span>

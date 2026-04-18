@@ -51,7 +51,7 @@ export default function Dashboard() {
     setData((prev) => ({
       ...prev,
       bodyParts: { ...prev.bodyParts, [partId]: {
-        notes: [...(prev.bodyParts[partId]?.notes || []), { id: crypto.randomUUID(), text, date: new Date().toISOString() }],
+        notes: [...(prev.bodyParts[partId]?.notes || []), { id: crypto.randomUUID(), text, date: new Date().toISOString(), source: "manual" as const }],
       }},
     }));
   }
