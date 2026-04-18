@@ -20,8 +20,11 @@ interface AnnotationItem {
   marker?: Marker;
 }
 
+type SortOrder = "newest" | "oldest";
+
 export default function AnnotationList({ data, onMarkerClick, onPartClick }: AnnotationListProps) {
   const [showAll, setShowAll] = useState(false);
+  const [sortOrder, setSortOrder] = useState<SortOrder>("newest");
 
   const items: AnnotationItem[] = [];
   data.markers.forEach((m) => {
@@ -33,7 +36,10 @@ export default function AnnotationList({ data, onMarkerClick, onPartClick }: Ann
       items.push({ type: "note", id: note.id, label: part?.label || partId, text: note.text, date: note.date, partId });
     });
   });
-  items.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  items.sort((a, b) => sortOrder === "newest"
+    ? new Date(b.date).getTime() - new Date(a.date).getTime()
+    : new Date(a.date).getTime() - new Date(b.date).getTime()
+  );
 
   const displayed = showAll ? items : items.slice(0, 4);
 
@@ -48,6 +54,12 @@ export default function AnnotationList({ data, onMarkerClick, onPartClick }: Ann
 
   return (
     <div className="space-y-1">
+      <div className="flex items-center justify-end mb-2">
+        <button onClick={() => setSortOrder(sortOrder === "newest" ? "oldest" : "newest")}
+          className="text-xs text-neutral-500 hover:text-neutral-300 transition-colors flex items-center gap-1">
+          {sortOrder === "newest" ? "Newest first ↓" : "Oldest first ↑"}
+        </button>
+      </div>
       {displayed.map((item) => (
         <button key={item.id}
           onClick={() => { if (item.type === "marker" && item.marker) onMarkerClick(item.marker); else if (item.partId) onPartClick(item.partId); }}
