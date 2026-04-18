@@ -12,7 +12,6 @@ import AnnotationList from "./body/AnnotationList";
 import VitalCard from "./vitals/VitalCard";
 import HistorySection from "./history/HistorySection";
 import LinksSection from "./LinksSection";
-import AISummary from "./AISummary";
 import Dock from "./Dock";
 
 const BODY_PART_CENTERS: Record<string, [number, number]> = {
@@ -178,11 +177,6 @@ export default function Dashboard() {
       <main className="max-w-6xl mx-auto px-6 py-8 space-y-6">
         {activeTab === "health" && (
           <>
-            {/* AI Summary - desktop only */}
-            <div className="hidden md:block">
-              <AISummary data={data} />
-            </div>
-
             {/* Body Map + Annotations */}
             <section className="flex flex-col lg:flex-row gap-4">
               <div className="lg:w-5/12">
