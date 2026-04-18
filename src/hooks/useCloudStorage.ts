@@ -7,6 +7,7 @@ export function useCloudStorage<T>(key: string, initialValue: T): [T, (val: T | 
   const [syncing, setSyncing] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const cloudLoaded = useRef(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -20,17 +21,18 @@ export function useCloudStorage<T>(key: string, initialValue: T): [T, (val: T | 
         }
       } catch {}
 
-      // Then fetch from cloud
+      // Then fetch from cloud - cloud always wins
       try {
         const res = await fetch("/api/data");
-        const result = await res.json();
-        if (result.data && !cancelled) {
-          setValue(result.data);
-          try { localStorage.setItem(key, JSON.stringify(result.data)); } catch {}
+        if (res.ok) {
+          const result = await res.json();
+          if (!cancelled && result.data) {
+            setValue(result.data);
+            cloudLoaded.current = true;
+            try { localStorage.setItem(key, JSON.stringify(result.data)); } catch {}
+          }
         }
-      } catch {
-        // Cloud unavailable, localStorage data stands
-      }
+      } catch {}
 
       if (!cancelled) setLoaded(true);
     }
@@ -49,20 +51,16 @@ export function useCloudStorage<T>(key: string, initialValue: T): [T, (val: T | 
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ data }),
         });
-      } catch {
-        // Silent fail, data is still in localStorage
-      }
+      } catch {}
       setSyncing(false);
-    }, 500); // Debounce 500ms
+    }, 500);
   }, []);
 
   const setAndSync = useCallback(
     (newVal: T | ((prev: T) => T)) => {
       setValue((prev) => {
         const resolved = typeof newVal === "function" ? (newVal as (prev: T) => T)(prev) : newVal;
-        // Save to localStorage immediately
         try { localStorage.setItem(key, JSON.stringify(resolved)); } catch {}
-        // Debounced save to cloud
         saveToCloud(resolved);
         return resolved;
       });
