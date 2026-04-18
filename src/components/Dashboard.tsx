@@ -3,13 +3,12 @@
 import { useState } from "react";
 import { HealthData, EMPTY_HEALTH_DATA, Marker } from "@/lib/types";
 import { useCloudStorage } from "@/hooks/useCloudStorage";
-import { MUM_DOB, calculateAge, VITAL_TYPES } from "@/lib/constants";
+import { MUM_DOB, calculateAge } from "@/lib/constants";
 import BodySvg from "./body/BodySvg";
 import MarkerLayer from "./body/MarkerLayer";
 import MarkerForm from "./body/MarkerForm";
 import BodyPartPanel from "./body/BodyPartPanel";
 import AnnotationList from "./body/AnnotationList";
-import VitalCard from "./vitals/VitalCard";
 import HistorySection from "./history/HistorySection";
 import LinksSection from "./LinksSection";
 import Dock from "./Dock";
@@ -99,17 +98,6 @@ export default function Dashboard() {
     if (modal?.type !== "edit-marker") return;
     setData((prev) => ({ ...prev, markers: prev.markers.filter((m) => m.id !== modal.marker.id) }));
     setModal(null);
-  }
-
-  function handleLogVital(type: string, value: string, date: string) {
-    const vitalDef = VITAL_TYPES.find((v) => v.id === type)!;
-    setData((prev) => ({ ...prev, vitals: [...prev.vitals, {
-      id: crypto.randomUUID(), type: vitalDef.id, value, unit: vitalDef.unit, date,
-    }] }));
-  }
-
-  function handleDeleteVital(id: string) {
-    setData((prev) => ({ ...prev, vitals: prev.vitals.filter((v) => v.id !== id) }));
   }
 
   const markerCounts: Record<string, number> = {};
@@ -254,18 +242,6 @@ export default function Dashboard() {
               </div>
             </section>
 
-            {/* Vitals */}
-            <section>
-              <h2 className="text-xs font-semibold text-neutral-500 uppercase tracking-widest mb-4">Vitals</h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {VITAL_TYPES.map((vt) => (
-                  <VitalCard key={vt.id} vitalDef={vt}
-                    readings={data.vitals.filter((v) => v.type === vt.id)}
-                    onLog={(value, date) => handleLogVital(vt.id, value, date)}
-                    onDelete={handleDeleteVital} />
-                ))}
-              </div>
-            </section>
           </>
         )}
 
