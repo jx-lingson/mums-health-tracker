@@ -120,13 +120,13 @@ export default function LinksSection({ data, onUpdate }: LinksSectionProps) {
   const catIcon: Record<string, string> = { consult: "🎙️", referral: "📋", document: "📄" };
 
   return (
-    <div className="bg-white rounded-2xl border border-stone-200 p-6 shadow-sm">
+    <div className="bg-neutral-900 rounded-2xl border border-neutral-800 p-6">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2 flex-wrap">
           <button
             onClick={() => setFilterCat("all")}
             className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
-              filterCat === "all" ? "bg-orange-600 text-white" : "bg-stone-100 text-stone-600 hover:bg-stone-200"
+              filterCat === "all" ? "bg-orange-600 text-white" : "bg-neutral-800 text-neutral-400 hover:bg-neutral-700"
             }`}
           >
             All ({links.length})
@@ -138,7 +138,7 @@ export default function LinksSection({ data, onUpdate }: LinksSectionProps) {
                 key={c.id}
                 onClick={() => setFilterCat(c.id)}
                 className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
-                  filterCat === c.id ? "bg-orange-600 text-white" : "bg-stone-100 text-stone-600 hover:bg-stone-200"
+                  filterCat === c.id ? "bg-orange-600 text-white" : "bg-neutral-800 text-neutral-400 hover:bg-neutral-700"
                 }`}
               >
                 {c.icon} {c.label} {count > 0 && `(${count})`}
@@ -148,19 +148,19 @@ export default function LinksSection({ data, onUpdate }: LinksSectionProps) {
         </div>
         <button
           onClick={() => { setShowAdd(!showAdd); if (showAdd) resetForm(); }}
-          className="px-3 py-1.5 text-xs font-medium rounded-lg bg-orange-600 text-white hover:bg-orange-700 transition-colors flex-shrink-0"
+          className="px-3 py-1.5 text-xs font-medium rounded-lg bg-orange-600 text-white hover:bg-orange-500 transition-colors flex-shrink-0"
         >
           {showAdd ? "Cancel" : "+ Add"}
         </button>
       </div>
 
       {showAdd && (
-        <div className="pb-4 mb-4 border-b border-stone-100">
+        <div className="pb-4 mb-4 border-b border-neutral-800">
           <div className="flex gap-2 mb-3">
             <button
               onClick={() => setAddMode("link")}
               className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
-                addMode === "link" ? "bg-stone-900 text-white" : "bg-stone-100 text-stone-600 hover:bg-stone-200"
+                addMode === "link" ? "bg-neutral-700 text-white" : "bg-neutral-800 text-neutral-400 hover:bg-neutral-700"
               }`}
             >
               Paste Link
@@ -168,7 +168,7 @@ export default function LinksSection({ data, onUpdate }: LinksSectionProps) {
             <button
               onClick={() => setAddMode("file")}
               className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
-                addMode === "file" ? "bg-stone-900 text-white" : "bg-stone-100 text-stone-600 hover:bg-stone-200"
+                addMode === "file" ? "bg-neutral-700 text-white" : "bg-neutral-800 text-neutral-400 hover:bg-neutral-700"
               }`}
             >
               Upload File
@@ -182,7 +182,7 @@ export default function LinksSection({ data, onUpdate }: LinksSectionProps) {
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Title (e.g. Dr Smith consult, Knee MRI results)"
-                className="w-full border border-stone-200 rounded-lg p-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                className="w-full bg-neutral-800 border border-neutral-700 rounded-lg p-2.5 text-sm text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
                 autoFocus
               />
               <input
@@ -190,17 +190,17 @@ export default function LinksSection({ data, onUpdate }: LinksSectionProps) {
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
                 placeholder="Paste link here..."
-                className="w-full border border-stone-200 rounded-lg p-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                className="w-full bg-neutral-800 border border-neutral-700 rounded-lg p-2.5 text-sm text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
               />
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-xs text-stone-500">Type:</span>
+                <span className="text-xs text-neutral-500">Type:</span>
                 {categories.map((c) => (
                   <button
                     key={c.id}
                     type="button"
                     onClick={() => setCategory(c.id)}
                     className={`px-3 py-1 text-xs rounded-lg transition-colors ${
-                      category === c.id ? "bg-orange-100 text-orange-700" : "bg-stone-100 text-stone-500"
+                      category === c.id ? "bg-orange-950 text-orange-400" : "bg-stone-100 text-neutral-500"
                     }`}
                   >
                     {c.icon} {c.label}
@@ -229,24 +229,24 @@ export default function LinksSection({ data, onUpdate }: LinksSectionProps) {
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Title"
-                className="w-full border border-stone-200 rounded-lg p-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                className="w-full bg-neutral-800 border border-neutral-700 rounded-lg p-2.5 text-sm text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
                 autoFocus
               />
               <div
                 onClick={() => fileInputRef.current?.click()}
                 className={`border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-colors ${
-                  fileData ? "border-orange-300 bg-orange-50" : "border-stone-200 hover:border-stone-300"
+                  fileData ? "border-orange-800 bg-orange-950/30" : "border-neutral-700 hover:border-neutral-600"
                 }`}
               >
                 {fileData ? (
                   <div>
-                    <p className="text-sm font-medium text-stone-900">{fileName}</p>
-                    <p className="text-xs text-stone-400 mt-1">Click to change file</p>
+                    <p className="text-sm font-medium text-neutral-900">{fileName}</p>
+                    <p className="text-xs text-neutral-400 mt-1">Click to change file</p>
                   </div>
                 ) : (
                   <div>
-                    <p className="text-sm text-stone-500">Click to select a file</p>
-                    <p className="text-xs text-stone-400 mt-1">PDF, images, documents (max 4MB)</p>
+                    <p className="text-sm text-neutral-500">Click to select a file</p>
+                    <p className="text-xs text-neutral-400 mt-1">PDF, images, documents (max 4MB)</p>
                   </div>
                 )}
               </div>
@@ -259,14 +259,14 @@ export default function LinksSection({ data, onUpdate }: LinksSectionProps) {
               />
               {fileError && <p className="text-xs text-red-500">{fileError}</p>}
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-xs text-stone-500">Type:</span>
+                <span className="text-xs text-neutral-500">Type:</span>
                 {categories.map((c) => (
                   <button
                     key={c.id}
                     type="button"
                     onClick={() => setCategory(c.id)}
                     className={`px-3 py-1 text-xs rounded-lg transition-colors ${
-                      category === c.id ? "bg-orange-100 text-orange-700" : "bg-stone-100 text-stone-500"
+                      category === c.id ? "bg-orange-950 text-orange-400" : "bg-stone-100 text-neutral-500"
                     }`}
                   >
                     {c.icon} {c.label}
@@ -293,7 +293,7 @@ export default function LinksSection({ data, onUpdate }: LinksSectionProps) {
       )}
 
       {sorted.length === 0 ? (
-        <p className="text-sm text-stone-400 text-center py-4">
+        <p className="text-sm text-neutral-400 text-center py-4">
           {links.length === 0
             ? "No links or documents saved yet. Add Granola consult recordings, referrals, or upload medical documents."
             : "No items in this category."}
@@ -301,38 +301,38 @@ export default function LinksSection({ data, onUpdate }: LinksSectionProps) {
       ) : (
         <div className="space-y-2">
           {sorted.map((link) => (
-            <div key={link.id} className="flex items-start gap-3 p-3 rounded-xl hover:bg-stone-50 transition-colors group">
+            <div key={link.id} className="flex items-start gap-3 p-3 rounded-xl hover:bg-neutral-800/50 transition-colors group">
               <span className="text-base mt-0.5">{catIcon[link.category]}</span>
               <div className="flex-1 min-w-0">
                 {link.fileData ? (
                   <button
                     onClick={() => handleOpenFile(link)}
-                    className="text-sm font-medium text-stone-900 hover:text-orange-600 transition-colors text-left"
+                    className="text-sm font-medium text-neutral-900 hover:text-orange-600 transition-colors text-left"
                   >
                     {link.title}
-                    <span className="ml-1.5 text-xs text-stone-400 font-normal">{link.fileName}</span>
+                    <span className="ml-1.5 text-xs text-neutral-400 font-normal">{link.fileName}</span>
                   </button>
                 ) : (
                   <a
                     href={link.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-sm font-medium text-stone-900 hover:text-orange-600 transition-colors"
+                    className="text-sm font-medium text-neutral-900 hover:text-orange-600 transition-colors"
                   >
                     {link.title}
-                    <span className="text-stone-300 ml-1">↗</span>
+                    <span className="text-neutral-300 ml-1">↗</span>
                   </a>
                 )}
                 <div className="flex items-center gap-2 mt-0.5">
-                  <span className="text-xs text-stone-400">
+                  <span className="text-xs text-neutral-400">
                     {new Date(link.date).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })}
                   </span>
-                  {link.notes && <span className="text-xs text-stone-400">· {link.notes}</span>}
+                  {link.notes && <span className="text-xs text-neutral-400">· {link.notes}</span>}
                 </div>
               </div>
               <button
                 onClick={() => handleDelete(link.id)}
-                className="text-stone-300 hover:text-red-500 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity text-lg"
+                className="text-neutral-300 hover:text-red-500 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity text-lg"
               >
                 &times;
               </button>

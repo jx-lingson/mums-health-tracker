@@ -1,13 +1,14 @@
 @import "tailwindcss";
 
 :root {
-  --background: #faf9f7;
-  --foreground: #1c1917;
-  --card: #ffffff;
-  --card-border: #e7e5e4;
-  --muted: #78716c;
+  --background: #0a0a0a;
+  --foreground: #fafaf9;
+  --card: #171717;
+  --card-border: #262626;
+  --card-hover: #1c1c1c;
+  --muted: #a8a29e;
   --accent: #ea580c;
-  --accent-light: #fff7ed;
+  --accent-light: #fb923c;
 }
 
 @theme inline {
@@ -26,12 +27,10 @@ body {
   color: var(--foreground);
 }
 
-@layer utilities {
-  .marker-pulse {
-    animation: pulse-ring 2s ease-in-out infinite;
-  }
-  @keyframes pulse-ring {
-    0%, 100% { opacity: 0.4; transform: scale(1); }
-    50% { opacity: 0.1; transform: scale(1.5); }
-  }
+::selection {
+  background: rgba(234, 88, 12, 0.3);
+}
+
+input, textarea, select {
+  color-scheme: dark;
 }

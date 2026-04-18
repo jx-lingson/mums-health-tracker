@@ -27,10 +27,7 @@ function getClosestBodyPart(x: number, y: number): string | null {
   let minDist = Infinity;
   for (const [id, [cx, cy]] of Object.entries(BODY_PART_CENTERS)) {
     const dist = Math.sqrt((x - cx) ** 2 + (y - cy) ** 2);
-    if (dist < minDist && dist < 60) {
-      minDist = dist;
-      closest = id;
-    }
+    if (dist < minDist && dist < 60) { minDist = dist; closest = id; }
   }
   return closest;
 }
@@ -51,27 +48,18 @@ export default function Dashboard() {
   function handleAddNote(partId: string, text: string) {
     setData((prev) => ({
       ...prev,
-      bodyParts: {
-        ...prev.bodyParts,
-        [partId]: {
-          notes: [
-            ...(prev.bodyParts[partId]?.notes || []),
-            { id: crypto.randomUUID(), text, date: new Date().toISOString() },
-          ],
-        },
-      },
+      bodyParts: { ...prev.bodyParts, [partId]: {
+        notes: [...(prev.bodyParts[partId]?.notes || []), { id: crypto.randomUUID(), text, date: new Date().toISOString() }],
+      }},
     }));
   }
 
   function handleDeleteNote(partId: string, noteId: string) {
     setData((prev) => ({
       ...prev,
-      bodyParts: {
-        ...prev.bodyParts,
-        [partId]: {
-          notes: (prev.bodyParts[partId]?.notes || []).filter((n) => n.id !== noteId),
-        },
-      },
+      bodyParts: { ...prev.bodyParts, [partId]: {
+        notes: (prev.bodyParts[partId]?.notes || []).filter((n) => n.id !== noteId),
+      }},
     }));
   }
 
@@ -82,26 +70,16 @@ export default function Dashboard() {
 
   function handleSaveNewMarker(label: string, note: string, color: "red" | "orange" | "yellow") {
     if (modal?.type !== "new-marker") return;
-    const marker: Marker = {
-      id: crypto.randomUUID(),
-      x: modal.x,
-      y: modal.y,
-      label,
-      note,
-      color,
-      createdAt: new Date().toISOString(),
-    };
-    setData((prev) => ({ ...prev, markers: [...prev.markers, marker] }));
+    setData((prev) => ({ ...prev, markers: [...prev.markers, {
+      id: crypto.randomUUID(), x: modal.x, y: modal.y, label, note, color, createdAt: new Date().toISOString(),
+    }] }));
     setModal(null);
   }
 
   function handleUpdateMarker(label: string, note: string, color: "red" | "orange" | "yellow") {
     if (modal?.type !== "edit-marker") return;
     const id = modal.marker.id;
-    setData((prev) => ({
-      ...prev,
-      markers: prev.markers.map((m) => (m.id === id ? { ...m, label, note, color } : m)),
-    }));
+    setData((prev) => ({ ...prev, markers: prev.markers.map((m) => (m.id === id ? { ...m, label, note, color } : m)) }));
     setModal(null);
   }
 
@@ -113,16 +91,9 @@ export default function Dashboard() {
 
   function handleLogVital(type: string, value: string, date: string) {
     const vitalDef = VITAL_TYPES.find((v) => v.id === type)!;
-    setData((prev) => ({
-      ...prev,
-      vitals: [...prev.vitals, {
-        id: crypto.randomUUID(),
-        type: vitalDef.id,
-        value,
-        unit: vitalDef.unit,
-        date,
-      }],
-    }));
+    setData((prev) => ({ ...prev, vitals: [...prev.vitals, {
+      id: crypto.randomUUID(), type: vitalDef.id, value, unit: vitalDef.unit, date,
+    }] }));
   }
 
   function handleDeleteVital(id: string) {
@@ -139,41 +110,39 @@ export default function Dashboard() {
   });
 
   return (
-    <div className="min-h-screen bg-[#faf9f7]">
+    <div className="min-h-screen bg-[#0a0a0a] text-white">
       {/* Header */}
-      <header className="bg-stone-900 text-white">
-        <div className="max-w-6xl mx-auto px-6 py-5 flex items-center justify-between">
+      <header className="border-b border-neutral-800/50">
+        <div className="max-w-6xl mx-auto px-6 py-6 flex items-center justify-between">
           <div>
-            <h1 className="text-xl font-bold tracking-tight">Chinn Health Tracker</h1>
-            <p className="text-stone-400 text-sm mt-0.5">Health monitoring dashboard</p>
+            <h1 className="text-2xl font-bold tracking-tight text-white">Chinn Health</h1>
+            <p className="text-neutral-500 text-sm mt-0.5">Health monitoring dashboard</p>
           </div>
           <div className="text-right">
-            <p className="text-2xl font-bold tabular-nums">{age.years}<span className="text-stone-400 text-sm font-normal ml-1">years</span></p>
-            <p className="text-stone-400 text-xs">{age.months} months</p>
+            <div className="bg-gradient-to-br from-orange-500 to-orange-700 rounded-2xl px-5 py-3">
+              <p className="text-3xl font-bold tabular-nums leading-none">{age.years}</p>
+              <p className="text-orange-200 text-xs mt-1">years, {age.months}mo</p>
+            </div>
           </div>
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto px-6 py-8 space-y-8">
+      <main className="max-w-6xl mx-auto px-6 py-8 space-y-6">
         {/* AI Summary */}
         <AISummary data={data} />
 
         {/* Body Map + Annotations */}
-        <section className="flex flex-col lg:flex-row gap-6">
-          {/* Body */}
+        <section className="flex flex-col lg:flex-row gap-4">
           <div className="lg:w-5/12">
-            <div className="bg-white rounded-2xl border border-stone-200 p-6 shadow-sm">
+            <div className="bg-neutral-900 rounded-2xl border border-neutral-800 p-6">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-sm font-semibold text-stone-500 uppercase tracking-wide">Body Map</h2>
+                <h2 className="text-xs font-semibold text-neutral-500 uppercase tracking-widest">Body Map</h2>
                 <button
-                  onClick={() => {
-                    setIsPlacingMarker(!isPlacingMarker);
-                    if (!isPlacingMarker) setModal(null);
-                  }}
-                  className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
+                  onClick={() => { setIsPlacingMarker(!isPlacingMarker); if (!isPlacingMarker) setModal(null); }}
+                  className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${
                     isPlacingMarker
-                      ? "bg-stone-200 text-stone-700"
-                      : "bg-orange-600 text-white hover:bg-orange-700"
+                      ? "bg-neutral-700 text-neutral-300"
+                      : "bg-orange-600 text-white hover:bg-orange-500"
                   }`}
                 >
                   {isPlacingMarker ? "Cancel" : "Add Marker"}
@@ -181,7 +150,7 @@ export default function Dashboard() {
               </div>
 
               {isPlacingMarker && (
-                <div className="bg-orange-50 text-orange-700 text-xs font-medium px-3 py-2 rounded-lg mb-4 text-center">
+                <div className="bg-orange-950/50 text-orange-400 text-xs font-medium px-3 py-2 rounded-lg mb-4 text-center border border-orange-900/50">
                   Click anywhere on the body to place a marker
                 </div>
               )}
@@ -202,17 +171,10 @@ export default function Dashboard() {
                 </div>
               </div>
 
-              {/* Modal forms */}
               {modal?.type === "part" && (
                 <div className="mt-4">
-                  <BodyPartPanel
-                    key={modal.partId}
-                    partId={modal.partId}
-                    entry={data.bodyParts[modal.partId]}
-                    onAddNote={handleAddNote}
-                    onDeleteNote={handleDeleteNote}
-                    onClose={() => setModal(null)}
-                  />
+                  <BodyPartPanel key={modal.partId} partId={modal.partId} entry={data.bodyParts[modal.partId]}
+                    onAddNote={handleAddNote} onDeleteNote={handleDeleteNote} onClose={() => setModal(null)} />
                 </div>
               )}
               {modal?.type === "new-marker" && (
@@ -222,56 +184,45 @@ export default function Dashboard() {
               )}
               {modal?.type === "edit-marker" && (
                 <div className="mt-4">
-                  <MarkerForm
-                    key={modal.marker.id}
-                    marker={modal.marker}
-                    onSave={handleUpdateMarker}
-                    onDelete={handleDeleteMarker}
-                    onCancel={() => setModal(null)}
-                  />
+                  <MarkerForm key={modal.marker.id} marker={modal.marker}
+                    onSave={handleUpdateMarker} onDelete={handleDeleteMarker} onCancel={() => setModal(null)} />
                 </div>
               )}
             </div>
           </div>
 
-          {/* Annotations */}
           <div className="lg:w-7/12">
-            <div className="bg-white rounded-2xl border border-stone-200 p-6 shadow-sm h-full">
-              <h2 className="text-sm font-semibold text-stone-500 uppercase tracking-wide mb-4">Body Annotations</h2>
-              <AnnotationList
-                data={data}
+            <div className="bg-neutral-900 rounded-2xl border border-neutral-800 p-6 h-full">
+              <h2 className="text-xs font-semibold text-neutral-500 uppercase tracking-widest mb-4">Body Annotations</h2>
+              <AnnotationList data={data}
                 onMarkerClick={(marker) => setModal({ type: "edit-marker", marker })}
-                onPartClick={(partId) => setModal({ type: "part", partId })}
-              />
+                onPartClick={(partId) => setModal({ type: "part", partId })} />
             </div>
           </div>
         </section>
 
         {/* Vitals */}
         <section>
-          <h2 className="text-sm font-semibold text-stone-500 uppercase tracking-wide mb-4">Vitals</h2>
+          <h2 className="text-xs font-semibold text-neutral-500 uppercase tracking-widest mb-4">Vitals</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {VITAL_TYPES.map((vt) => (
-              <VitalCard
-                key={vt.id}
-                vitalDef={vt}
+              <VitalCard key={vt.id} vitalDef={vt}
                 readings={data.vitals.filter((v) => v.type === vt.id)}
                 onLog={(value, date) => handleLogVital(vt.id, value, date)}
-                onDelete={handleDeleteVital}
-              />
+                onDelete={handleDeleteVital} />
             ))}
           </div>
         </section>
 
         {/* Documents & Links */}
         <section>
-          <h2 className="text-sm font-semibold text-stone-500 uppercase tracking-wide mb-4">Documents & Links</h2>
+          <h2 className="text-xs font-semibold text-neutral-500 uppercase tracking-widest mb-4">Documents & Links</h2>
           <LinksSection data={data} onUpdate={setData} />
         </section>
 
         {/* Medical History */}
         <section>
-          <h2 className="text-sm font-semibold text-stone-500 uppercase tracking-wide mb-4">Medical History</h2>
+          <h2 className="text-xs font-semibold text-neutral-500 uppercase tracking-widest mb-4">Medical History</h2>
           <HistorySection data={data} onUpdate={setData} />
         </section>
       </main>
