@@ -138,6 +138,7 @@ export default function BodyView({ data, onUpdate }: BodyViewProps) {
             partId={sidePanel.partId}
             entry={data.bodyParts[sidePanel.partId]}
             onAddNote={handleAddNote}
+            onEditNote={() => {}}
             onDeleteNote={handleDeleteNote}
             onClose={() => setSidePanel(null)}
           />

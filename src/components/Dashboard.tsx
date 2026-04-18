@@ -57,6 +57,15 @@ export default function Dashboard() {
     }));
   }
 
+  function handleEditNote(partId: string, noteId: string, text: string, date: string) {
+    setData((prev) => ({
+      ...prev,
+      bodyParts: { ...prev.bodyParts, [partId]: {
+        notes: (prev.bodyParts[partId]?.notes || []).map((n) => n.id === noteId ? { ...n, text, date } : n),
+      }},
+    }));
+  }
+
   function handleDeleteNote(partId: string, noteId: string) {
     setData((prev) => ({
       ...prev,
@@ -218,7 +227,7 @@ export default function Dashboard() {
                   {modal?.type === "part" && (
                     <div className="mt-4">
                       <BodyPartPanel key={modal.partId} partId={modal.partId} entry={data.bodyParts[modal.partId]}
-                        onAddNote={handleAddNote} onDeleteNote={handleDeleteNote} onClose={() => setModal(null)} />
+                        onAddNote={handleAddNote} onEditNote={handleEditNote} onDeleteNote={handleDeleteNote} onClose={() => setModal(null)} />
                     </div>
                   )}
                   {modal?.type === "new-marker" && (

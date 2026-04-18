@@ -67,6 +67,7 @@ export default function HistorySection({ data, onUpdate }: HistorySectionProps) 
           showAdd={showAddForm}
           onToggleAdd={() => setShowAddForm(!showAddForm)}
           onAdd={(med) => { onUpdate((p) => ({ ...p, medications: [...p.medications, med] })); setShowAddForm(false); }}
+          onEdit={(med) => onUpdate((p) => ({ ...p, medications: p.medications.map((m) => m.id === med.id ? med : m) }))}
           onDelete={(id) => onUpdate((p) => ({ ...p, medications: p.medications.filter((m) => m.id !== id) }))}
         />
       )}
@@ -76,6 +77,7 @@ export default function HistorySection({ data, onUpdate }: HistorySectionProps) 
           showAdd={showAddForm}
           onToggleAdd={() => setShowAddForm(!showAddForm)}
           onAdd={(s) => { onUpdate((p) => ({ ...p, surgeries: [...p.surgeries, s] })); setShowAddForm(false); }}
+          onEdit={(s) => onUpdate((p) => ({ ...p, surgeries: p.surgeries.map((x) => x.id === s.id ? s : x) }))}
           onDelete={(id) => onUpdate((p) => ({ ...p, surgeries: p.surgeries.filter((s) => s.id !== id) }))}
         />
       )}
@@ -85,6 +87,7 @@ export default function HistorySection({ data, onUpdate }: HistorySectionProps) 
           showAdd={showAddForm}
           onToggleAdd={() => setShowAddForm(!showAddForm)}
           onAdd={(a) => { onUpdate((p) => ({ ...p, allergies: [...p.allergies, a] })); setShowAddForm(false); }}
+          onEdit={(a) => onUpdate((p) => ({ ...p, allergies: p.allergies.map((x) => x.id === a.id ? a : x) }))}
           onDelete={(id) => onUpdate((p) => ({ ...p, allergies: p.allergies.filter((a) => a.id !== id) }))}
         />
       )}
@@ -92,9 +95,9 @@ export default function HistorySection({ data, onUpdate }: HistorySectionProps) 
   );
 }
 
-function ExpandedMedications({ medications, showAdd, onToggleAdd, onAdd, onDelete }: {
+function ExpandedMedications({ medications, showAdd, onToggleAdd, onAdd, onEdit, onDelete }: {
   medications: Medication[]; showAdd: boolean; onToggleAdd: () => void;
-  onAdd: (m: Medication) => void; onDelete: (id: string) => void;
+  onAdd: (m: Medication) => void; onEdit: (m: Medication) => void; onDelete: (id: string) => void;
 }) {
   const [name, setName] = useState("");
   const [dosage, setDosage] = useState("");
@@ -135,34 +138,73 @@ function ExpandedMedications({ medications, showAdd, onToggleAdd, onAdd, onDelet
       {current.length > 0 && (
         <div>
           <p className="text-xs text-neutral-400 font-medium mb-1">Current</p>
-          {current.map((m) => <MedItem key={m.id} med={m} onDelete={() => onDelete(m.id)} />)}
+          {current.map((m) => <MedItem key={m.id} med={m} onEdit={onEdit} onDelete={() => onDelete(m.id)} />)}
         </div>
       )}
       {past.length > 0 && (
         <div>
           <p className="text-xs text-neutral-400 font-medium mb-1">Past</p>
-          {past.map((m) => <MedItem key={m.id} med={m} onDelete={() => onDelete(m.id)} />)}
+          {past.map((m) => <MedItem key={m.id} med={m} onEdit={onEdit} onDelete={() => onDelete(m.id)} />)}
         </div>
       )}
     </div>
   );
 }
 
-function MedItem({ med, onDelete }: { med: Medication; onDelete: () => void }) {
+function MedItem({ med, onEdit, onDelete }: { med: Medication; onEdit: (m: Medication) => void; onDelete: () => void }) {
+  const [editing, setEditing] = useState(false);
+  const [name, setName] = useState(med.name);
+  const [dosage, setDosage] = useState(med.dosage);
+  const [frequency, setFrequency] = useState(med.frequency);
+  const [startDate, setStartDate] = useState(med.startDate);
+  const [endDate, setEndDate] = useState(med.endDate || "");
+  const [notes, setNotes] = useState(med.notes);
+
+  if (editing) {
+    return (
+      <div className="bg-neutral-800/50 rounded-lg p-2.5 space-y-2 my-1">
+        <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Name"
+          className="w-full bg-neutral-800 border border-neutral-700 rounded-lg p-2 text-sm text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-orange-500" />
+        <div className="flex gap-2">
+          <input type="text" value={dosage} onChange={(e) => setDosage(e.target.value)} placeholder="Dosage"
+            className="flex-1 bg-neutral-800 border border-neutral-700 rounded-lg p-2 text-sm text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-orange-500" />
+          <input type="text" value={frequency} onChange={(e) => setFrequency(e.target.value)} placeholder="Frequency"
+            className="flex-1 bg-neutral-800 border border-neutral-700 rounded-lg p-2 text-sm text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-orange-500" />
+        </div>
+        <div className="flex gap-2">
+          <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)}
+            className="flex-1 bg-neutral-800 border border-neutral-700 rounded-lg p-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-orange-500" />
+          <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)}
+            className="flex-1 bg-neutral-800 border border-neutral-700 rounded-lg p-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-orange-500" />
+        </div>
+        <textarea value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Notes" rows={2}
+          className="w-full bg-neutral-800 border border-neutral-700 rounded-lg p-2 text-sm text-white resize-none focus:outline-none focus:ring-2 focus:ring-orange-500" />
+        <div className="flex gap-2">
+          <button onClick={() => { onEdit({ ...med, name, dosage, frequency, startDate, endDate: endDate || null, notes }); setEditing(false); }}
+            className="px-3 py-1 bg-orange-600 text-white text-xs rounded-lg hover:bg-orange-500">Save</button>
+          <button onClick={() => setEditing(false)} className="px-3 py-1 text-neutral-400 text-xs rounded-lg hover:bg-neutral-800">Cancel</button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex items-start justify-between py-2 group">
       <div>
         <p className="text-sm font-medium text-neutral-200">{med.name}</p>
         <p className="text-xs text-neutral-500">{[med.dosage, med.frequency].filter(Boolean).join(" · ")}</p>
       </div>
-      <button onClick={onDelete} className="text-neutral-300 hover:text-red-500 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">&times;</button>
+      <div className="flex items-center gap-1">
+        <button onClick={() => setEditing(true)} className="text-neutral-600 hover:text-orange-400 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity text-xs">Edit</button>
+        <button onClick={onDelete} className="text-neutral-600 hover:text-red-400 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">&times;</button>
+      </div>
     </div>
   );
 }
 
-function ExpandedSurgeries({ surgeries, showAdd, onToggleAdd, onAdd, onDelete }: {
+function ExpandedSurgeries({ surgeries, showAdd, onToggleAdd, onAdd, onEdit, onDelete }: {
   surgeries: Surgery[]; showAdd: boolean; onToggleAdd: () => void;
-  onAdd: (s: Surgery) => void; onDelete: (id: string) => void;
+  onAdd: (s: Surgery) => void; onEdit: (s: Surgery) => void; onDelete: (id: string) => void;
 }) {
   const [name, setName] = useState("");
   const [date, setDate] = useState("");
@@ -189,22 +231,57 @@ function ExpandedSurgeries({ surgeries, showAdd, onToggleAdd, onAdd, onDelete }:
         </form>
       )}
       {surgeries.length === 0 && <p className="text-xs text-neutral-400 py-2">No surgeries recorded.</p>}
-      {surgeries.map((s) => (
-        <div key={s.id} className="flex items-start justify-between py-2 group">
-          <div>
-            <p className="text-sm font-medium text-neutral-200">{s.name}</p>
-            <p className="text-xs text-neutral-500">{[s.date && new Date(s.date).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" }), s.hospital].filter(Boolean).join(" · ")}</p>
-          </div>
-          <button onClick={() => onDelete(s.id)} className="text-neutral-300 hover:text-red-500 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">&times;</button>
-        </div>
-      ))}
+      {surgeries.map((s) => <SurgeryItem key={s.id} surgery={s} onEdit={onEdit} onDelete={() => onDelete(s.id)} />)}
     </div>
   );
 }
 
-function ExpandedAllergies({ allergies, showAdd, onToggleAdd, onAdd, onDelete }: {
+function SurgeryItem({ surgery, onEdit, onDelete }: { surgery: Surgery; onEdit: (s: Surgery) => void; onDelete: () => void }) {
+  const [editing, setEditing] = useState(false);
+  const [name, setName] = useState(surgery.name);
+  const [date, setDate] = useState(surgery.date);
+  const [hospital, setHospital] = useState(surgery.hospital);
+  const [notes, setNotes] = useState(surgery.notes);
+
+  if (editing) {
+    return (
+      <div className="bg-neutral-800/50 rounded-lg p-2.5 space-y-2 my-1">
+        <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Name"
+          className="w-full bg-neutral-800 border border-neutral-700 rounded-lg p-2 text-sm text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-orange-500" />
+        <div className="flex gap-2">
+          <input type="date" value={date} onChange={(e) => setDate(e.target.value)}
+            className="flex-1 bg-neutral-800 border border-neutral-700 rounded-lg p-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-orange-500" />
+          <input type="text" value={hospital} onChange={(e) => setHospital(e.target.value)} placeholder="Hospital"
+            className="flex-1 bg-neutral-800 border border-neutral-700 rounded-lg p-2 text-sm text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-orange-500" />
+        </div>
+        <textarea value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Notes" rows={2}
+          className="w-full bg-neutral-800 border border-neutral-700 rounded-lg p-2 text-sm text-white resize-none focus:outline-none focus:ring-2 focus:ring-orange-500" />
+        <div className="flex gap-2">
+          <button onClick={() => { onEdit({ ...surgery, name, date, hospital, notes }); setEditing(false); }}
+            className="px-3 py-1 bg-orange-600 text-white text-xs rounded-lg hover:bg-orange-500">Save</button>
+          <button onClick={() => setEditing(false)} className="px-3 py-1 text-neutral-400 text-xs rounded-lg hover:bg-neutral-800">Cancel</button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex items-start justify-between py-2 group">
+      <div>
+        <p className="text-sm font-medium text-neutral-200">{surgery.name}</p>
+        <p className="text-xs text-neutral-500">{[surgery.date && new Date(surgery.date).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" }), surgery.hospital].filter(Boolean).join(" · ")}</p>
+      </div>
+      <div className="flex items-center gap-1">
+        <button onClick={() => setEditing(true)} className="text-neutral-600 hover:text-orange-400 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity text-xs">Edit</button>
+        <button onClick={onDelete} className="text-neutral-600 hover:text-red-400 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">&times;</button>
+      </div>
+    </div>
+  );
+}
+
+function ExpandedAllergies({ allergies, showAdd, onToggleAdd, onAdd, onEdit, onDelete }: {
   allergies: Allergy[]; showAdd: boolean; onToggleAdd: () => void;
-  onAdd: (a: Allergy) => void; onDelete: (id: string) => void;
+  onAdd: (a: Allergy) => void; onEdit: (a: Allergy) => void; onDelete: (id: string) => void;
 }) {
   const [name, setName] = useState("");
   const [severity, setSeverity] = useState<"mild" | "moderate" | "severe">("mild");
@@ -235,15 +312,55 @@ function ExpandedAllergies({ allergies, showAdd, onToggleAdd, onAdd, onDelete }:
         </form>
       )}
       {allergies.length === 0 && <p className="text-xs text-neutral-400 py-2">No allergies recorded.</p>}
-      {allergies.map((a) => (
-        <div key={a.id} className="flex items-start justify-between py-2 group">
-          <div className="flex items-center gap-2">
-            <p className="text-sm font-medium text-neutral-200">{a.name}</p>
-            <span className={`px-2 py-0.5 text-xs rounded-full capitalize ${severityColors[a.severity]}`}>{a.severity}</span>
-          </div>
-          <button onClick={() => onDelete(a.id)} className="text-neutral-300 hover:text-red-500 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">&times;</button>
+      {allergies.map((a) => <AllergyItem key={a.id} allergy={a} severityColors={severityColors} onEdit={onEdit} onDelete={() => onDelete(a.id)} />)}
+    </div>
+  );
+}
+
+function AllergyItem({ allergy, severityColors, onEdit, onDelete }: {
+  allergy: Allergy; severityColors: Record<string, string>; onEdit: (a: Allergy) => void; onDelete: () => void;
+}) {
+  const [editing, setEditing] = useState(false);
+  const [name, setName] = useState(allergy.name);
+  const [severity, setSeverity] = useState(allergy.severity);
+  const [reaction, setReaction] = useState(allergy.reaction);
+  const [notes, setNotes] = useState(allergy.notes);
+
+  if (editing) {
+    return (
+      <div className="bg-neutral-800/50 rounded-lg p-2.5 space-y-2 my-1">
+        <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Allergen"
+          className="w-full bg-neutral-800 border border-neutral-700 rounded-lg p-2 text-sm text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-orange-500" />
+        <div className="flex gap-2 items-center">
+          <span className="text-xs text-neutral-500">Severity:</span>
+          {(["mild", "moderate", "severe"] as const).map((s) => (
+            <button key={s} type="button" onClick={() => setSeverity(s)}
+              className={`px-2 py-0.5 text-xs rounded-full capitalize ${severity === s ? severityColors[s] : "bg-neutral-800 text-neutral-400"}`}>{s}</button>
+          ))}
         </div>
-      ))}
+        <input type="text" value={reaction} onChange={(e) => setReaction(e.target.value)} placeholder="Reaction"
+          className="w-full bg-neutral-800 border border-neutral-700 rounded-lg p-2 text-sm text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-orange-500" />
+        <textarea value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Notes" rows={2}
+          className="w-full bg-neutral-800 border border-neutral-700 rounded-lg p-2 text-sm text-white resize-none focus:outline-none focus:ring-2 focus:ring-orange-500" />
+        <div className="flex gap-2">
+          <button onClick={() => { onEdit({ ...allergy, name, severity, reaction, notes }); setEditing(false); }}
+            className="px-3 py-1 bg-orange-600 text-white text-xs rounded-lg hover:bg-orange-500">Save</button>
+          <button onClick={() => setEditing(false)} className="px-3 py-1 text-neutral-400 text-xs rounded-lg hover:bg-neutral-800">Cancel</button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex items-start justify-between py-2 group">
+      <div className="flex items-center gap-2">
+        <p className="text-sm font-medium text-neutral-200">{allergy.name}</p>
+        <span className={`px-2 py-0.5 text-xs rounded-full capitalize ${severityColors[allergy.severity]}`}>{allergy.severity}</span>
+      </div>
+      <div className="flex items-center gap-1">
+        <button onClick={() => setEditing(true)} className="text-neutral-600 hover:text-orange-400 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity text-xs">Edit</button>
+        <button onClick={onDelete} className="text-neutral-600 hover:text-red-400 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">&times;</button>
+      </div>
     </div>
   );
 }
