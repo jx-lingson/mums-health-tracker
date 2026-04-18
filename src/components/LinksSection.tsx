@@ -20,6 +20,7 @@ interface ExtractionResult {
   date: string | null;
   documentTitle: string;
   findings: { bodyPart: string; note: string }[];
+  takeaways?: string[];
 }
 
 export default function LinksSection({ data, onUpdate }: LinksSectionProps) {
@@ -90,11 +91,10 @@ export default function LinksSection({ data, onUpdate }: LinksSectionProps) {
           const result: ExtractionResult = await res.json();
           setExtractResult(result);
 
-          if (result.findings.length > 0) {
-            const docDate = result.date || new Date().toISOString().split("T")[0];
-            // Auto-create body annotations
-            onUpdate((prev) => {
-              const newBodyParts = { ...prev.bodyParts };
+          const docDate = result.date || new Date().toISOString().split("T")[0];
+          onUpdate((prev) => {
+            const newBodyParts = { ...prev.bodyParts };
+            if (result.findings.length > 0) {
               for (const finding of result.findings) {
                 const existing = newBodyParts[finding.bodyPart]?.notes || [];
                 newBodyParts[finding.bodyPart] = {
@@ -106,9 +106,13 @@ export default function LinksSection({ data, onUpdate }: LinksSectionProps) {
                   }],
                 };
               }
-              return { ...prev, bodyParts: newBodyParts };
-            });
-          }
+            }
+            // Save takeaways to the link
+            const newLinks = (prev.links || []).map((l) =>
+              l.id === linkData.id ? { ...l, takeaways: result.takeaways || [] } : l
+            );
+            return { ...prev, bodyParts: newBodyParts, links: newLinks };
+          });
         }
       }
     } catch {
@@ -322,6 +326,7 @@ function LinkItem({ link, catIcon, onEdit, onDelete, onOpenFile }: {
   onEdit: (l: SavedLink) => void; onDelete: () => void; onOpenFile: (l: SavedLink) => void;
 }) {
   const [editing, setEditing] = useState(false);
+  const [showTakeaways, setShowTakeaways] = useState(false);
   const [title, setTitle] = useState(link.title);
   const [date, setDate] = useState(new Date(link.date).toISOString().split("T")[0]);
   const [notes, setNotes] = useState(link.notes);
@@ -366,37 +371,61 @@ function LinkItem({ link, catIcon, onEdit, onDelete, onOpenFile }: {
     );
   }
 
+  const hasTakeaways = link.takeaways && link.takeaways.length > 0;
+
   return (
-    <div className="flex items-start gap-3 p-3 rounded-xl hover:bg-neutral-800/50 transition-colors group">
-      <span className="text-base mt-0.5">{catIcon[link.category]}</span>
-      <div className="flex-1 min-w-0">
-        {link.fileData ? (
-          <button onClick={() => onOpenFile(link)}
-            className="text-sm font-medium text-neutral-200 hover:text-orange-400 transition-colors text-left">
-            {link.title}
-            <span className="ml-1.5 text-xs text-neutral-600 font-normal">{link.fileName}</span>
-          </button>
-        ) : link.url ? (
-          <a href={link.url} target="_blank" rel="noopener noreferrer"
-            className="text-sm font-medium text-neutral-200 hover:text-orange-400 transition-colors">
-            {link.title}<span className="text-neutral-600 ml-1">↗</span>
-          </a>
-        ) : (
-          <p className="text-sm font-medium text-neutral-200">{link.title}</p>
-        )}
-        <div className="flex items-center gap-2 mt-0.5">
-          <span className="text-xs text-neutral-600">
-            {new Date(link.date).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })}
-          </span>
-          {link.notes && <span className="text-xs text-neutral-600">· {link.notes}</span>}
+    <div className={`rounded-xl transition-colors ${showTakeaways ? "bg-neutral-800/30" : ""}`}>
+      <div className="flex items-start gap-3 p-3 rounded-xl hover:bg-neutral-800/50 transition-colors group">
+        <span className="text-base mt-0.5">{catIcon[link.category]}</span>
+        <div className="flex-1 min-w-0">
+          {link.fileData ? (
+            <button onClick={() => onOpenFile(link)}
+              className="text-sm font-medium text-neutral-200 hover:text-orange-400 transition-colors text-left">
+              {link.title}
+              <span className="ml-1.5 text-xs text-neutral-600 font-normal">{link.fileName}</span>
+            </button>
+          ) : link.url ? (
+            <a href={link.url} target="_blank" rel="noopener noreferrer"
+              className="text-sm font-medium text-neutral-200 hover:text-orange-400 transition-colors">
+              {link.title}<span className="text-neutral-600 ml-1">↗</span>
+            </a>
+          ) : (
+            <p className="text-sm font-medium text-neutral-200">{link.title}</p>
+          )}
+          <div className="flex items-center gap-2 mt-0.5">
+            <span className="text-xs text-neutral-600">
+              {new Date(link.date).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })}
+            </span>
+            {link.notes && <span className="text-xs text-neutral-600">· {link.notes}</span>}
+            {hasTakeaways && (
+              <button onClick={() => setShowTakeaways(!showTakeaways)}
+                className="text-xs text-orange-500/70 hover:text-orange-400 transition-colors flex items-center gap-0.5">
+                Key takeaways
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+                  className={`transition-transform ${showTakeaways ? "rotate-180" : ""}`}>
+                  <polyline points="6 9 12 15 18 9" />
+                </svg>
+              </button>
+            )}
+          </div>
+        </div>
+        <div className="flex items-center gap-1">
+          <button onClick={() => setEditing(true)}
+            className="text-neutral-700 hover:text-orange-400 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity text-xs">Edit</button>
+          <button onClick={onDelete}
+            className="text-neutral-700 hover:text-red-400 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity text-lg">&times;</button>
         </div>
       </div>
-      <div className="flex items-center gap-1">
-        <button onClick={() => setEditing(true)}
-          className="text-neutral-700 hover:text-orange-400 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity text-xs">Edit</button>
-        <button onClick={onDelete}
-          className="text-neutral-700 hover:text-red-400 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity text-lg">&times;</button>
-      </div>
+      {showTakeaways && hasTakeaways && (
+        <div className="px-3 pb-3 ml-9 space-y-1.5">
+          {link.takeaways!.map((t, i) => (
+            <div key={i} className="flex items-start gap-2">
+              <span className="text-orange-500/50 text-xs mt-0.5">{i + 1}.</span>
+              <p className="text-xs text-neutral-400">{t}</p>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

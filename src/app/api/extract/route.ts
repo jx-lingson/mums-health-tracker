@@ -28,6 +28,8 @@ IMPORTANT:
 - Be concise but specific in your notes
 - Include the actual values when relevant (e.g., "Blood pressure elevated at 150/95")
 
+Also provide 3-5 key takeaways from the entire document. These should be the most important things a family member tracking this person's health should know. Keep each takeaway to one plain sentence. Include both normal and abnormal highlights here.
+
 Respond in this exact JSON format:
 {
   "date": "YYYY-MM-DD or null if not found",
@@ -37,11 +39,15 @@ Respond in this exact JSON format:
       "bodyPart": "one of the body parts listed above",
       "note": "concise description of the abnormal finding"
     }
+  ],
+  "takeaways": [
+    "key takeaway 1",
+    "key takeaway 2"
   ]
 }
 
-If there are no abnormal findings, return an empty findings array.
-Do not include any text outside the JSON.`;
+If there are no abnormal findings, return an empty findings array but still provide takeaways.
+Do not use any markdown formatting. Do not include any text outside the JSON.`;
 
 export async function POST(req: NextRequest) {
   try {

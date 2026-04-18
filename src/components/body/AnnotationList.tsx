@@ -83,7 +83,6 @@ export default function AnnotationList({ data, onMarkerClick, onPartClick, marke
                 <span className="text-sm font-medium text-neutral-200 truncate">
                   {item.label}
                   {item.source === "extracted" && <span className="ml-1.5 text-[10px] font-medium text-orange-500/70 uppercase">auto</span>}
-                  {(item.source === "manual" || (!item.source && item.type === "note")) && <span className="ml-1.5 text-[10px] font-medium text-green-500/70 uppercase">manual</span>}
                 </span>
                 <span className="text-xs text-neutral-600 flex-shrink-0">
                   {new Date(item.date).toLocaleDateString("en-AU", { day: "numeric", month: "short" })}

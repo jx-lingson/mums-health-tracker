@@ -18,6 +18,7 @@ export interface SavedLink {
   fileData?: string;
   fileName?: string;
   fileType?: string;
+  takeaways?: string[];
 }
 
 export interface BodyPartEntry {
