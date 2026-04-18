@@ -325,6 +325,7 @@ function LinkItem({ link, catIcon, onEdit, onDelete, onOpenFile }: {
   const [date, setDate] = useState(new Date(link.date).toISOString().split("T")[0]);
   const [notes, setNotes] = useState(link.notes);
   const [url, setUrl] = useState(link.url);
+  const [category, setCategory] = useState(link.category);
 
   if (editing) {
     return (
@@ -339,10 +340,23 @@ function LinkItem({ link, catIcon, onEdit, onDelete, onOpenFile }: {
               className="flex-1 bg-neutral-800 border border-neutral-700 rounded-lg p-2 text-sm text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-orange-500" />
           )}
         </div>
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-xs text-neutral-500">Type:</span>
+          {([
+            { id: "consult" as const, label: "Consult", icon: "🎙️" },
+            { id: "referral" as const, label: "Referral", icon: "📋" },
+            { id: "document" as const, label: "Document", icon: "📄" },
+          ]).map((c) => (
+            <button key={c.id} onClick={() => setCategory(c.id)}
+              className={`px-2 py-0.5 text-xs rounded-lg transition-colors ${category === c.id ? "bg-orange-950 text-orange-400" : "bg-neutral-800 text-neutral-500"}`}>
+              {c.icon} {c.label}
+            </button>
+          ))}
+        </div>
         <textarea value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Notes" rows={2}
           className="w-full bg-neutral-800 border border-neutral-700 rounded-lg p-2 text-sm text-white resize-none placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-orange-500" />
         <div className="flex gap-2">
-          <button onClick={() => { onEdit({ ...link, title, date: new Date(date + "T12:00:00").toISOString(), notes, url }); setEditing(false); }}
+          <button onClick={() => { onEdit({ ...link, title, date: new Date(date + "T12:00:00").toISOString(), notes, url, category }); setEditing(false); }}
             className="px-3 py-1 bg-orange-600 text-white text-xs rounded-lg hover:bg-orange-500">Save</button>
           <button onClick={() => { setEditing(false); setTitle(link.title); setDate(new Date(link.date).toISOString().split("T")[0]); setNotes(link.notes); setUrl(link.url); }}
             className="px-3 py-1 text-neutral-400 text-xs rounded-lg hover:bg-neutral-800">Cancel</button>
