@@ -178,8 +178,10 @@ export default function Dashboard() {
       <main className="max-w-6xl mx-auto px-6 py-8 space-y-6">
         {activeTab === "health" && (
           <>
-            {/* AI Summary */}
-            <AISummary data={data} />
+            {/* AI Summary - desktop only */}
+            <div className="hidden md:block">
+              <AISummary data={data} />
+            </div>
 
             {/* Body Map + Annotations */}
             <section className="flex flex-col lg:flex-row gap-4">
