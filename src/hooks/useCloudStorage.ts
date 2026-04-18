@@ -2,33 +2,42 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 
-export function useCloudStorage<T>(key: string, initialValue: T): [T, (val: T | ((prev: T) => T)) => void, boolean] {
+export function useCloudStorage<T>(key: string, initialValue: T): [T, (val: T | ((prev: T) => T)) => void, boolean, () => Promise<void>] {
   const [value, setValue] = useState<T>(initialValue);
   const [syncing, setSyncing] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const cloudLoaded = useRef(false);
+
+  const fetchFromCloud = useCallback(async () => {
+    setSyncing(true);
+    try {
+      const res = await fetch("/api/data");
+      if (res.ok) {
+        const result = await res.json();
+        if (result.data) {
+          setValue(result.data);
+          try { localStorage.setItem(key, JSON.stringify(result.data)); } catch {}
+        }
+      }
+    } catch {}
+    setSyncing(false);
+  }, [key]);
 
   useEffect(() => {
     let cancelled = false;
 
     async function load() {
-      // Load from localStorage first for instant display
       try {
         const stored = localStorage.getItem(key);
-        if (stored && !cancelled) {
-          setValue(JSON.parse(stored));
-        }
+        if (stored && !cancelled) setValue(JSON.parse(stored));
       } catch {}
 
-      // Then fetch from cloud - cloud always wins
       try {
         const res = await fetch("/api/data");
         if (res.ok) {
           const result = await res.json();
           if (!cancelled && result.data) {
             setValue(result.data);
-            cloudLoaded.current = true;
             try { localStorage.setItem(key, JSON.stringify(result.data)); } catch {}
           }
         }
@@ -68,5 +77,5 @@ export function useCloudStorage<T>(key: string, initialValue: T): [T, (val: T | 
     [key, saveToCloud]
   );
 
-  return [loaded ? value : initialValue, setAndSync, syncing];
+  return [loaded ? value : initialValue, setAndSync, syncing, fetchFromCloud];
 }
