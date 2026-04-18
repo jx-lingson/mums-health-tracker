@@ -6,6 +6,16 @@ export interface HealthData {
   surgeries: Surgery[];
   allergies: Allergy[];
   links: SavedLink[];
+  bloodMarkers: BloodMarkerReading[];
+}
+
+export interface BloodMarkerReading {
+  id: string;
+  type: string;
+  value: string;
+  unit: string;
+  date: string;
+  status?: "normal" | "low" | "high";
 }
 
 export interface SavedLink {
@@ -92,4 +102,5 @@ export const EMPTY_HEALTH_DATA: HealthData = {
   surgeries: [],
   allergies: [],
   links: [],
+  bloodMarkers: [],
 };

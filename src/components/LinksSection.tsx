@@ -20,6 +20,7 @@ interface ExtractionResult {
   date: string | null;
   documentTitle: string;
   findings: { bodyPart: string; note: string }[];
+  bloodMarkers?: { type: string; value: string; unit: string; status: "normal" | "low" | "high" }[];
   takeaways?: string[];
 }
 
@@ -107,11 +108,25 @@ export default function LinksSection({ data, onUpdate }: LinksSectionProps) {
                 };
               }
             }
+            // Save blood markers
+            const newBloodMarkers = [...(prev.bloodMarkers || [])];
+            if (result.bloodMarkers && result.bloodMarkers.length > 0) {
+              for (const bm of result.bloodMarkers) {
+                newBloodMarkers.push({
+                  id: crypto.randomUUID(),
+                  type: bm.type,
+                  value: bm.value,
+                  unit: bm.unit,
+                  date: docDate + "T12:00:00.000Z",
+                  status: bm.status,
+                });
+              }
+            }
             // Save takeaways to the link
             const newLinks = (prev.links || []).map((l) =>
               l.id === linkData.id ? { ...l, takeaways: result.takeaways || [] } : l
             );
-            return { ...prev, bodyParts: newBodyParts, links: newLinks };
+            return { ...prev, bodyParts: newBodyParts, bloodMarkers: newBloodMarkers, links: newLinks };
           });
         }
       }
@@ -283,24 +298,39 @@ export default function LinksSection({ data, onUpdate }: LinksSectionProps) {
               <button onClick={() => { setExtractResult(null); resetForm(); }}
                 className="text-xs text-neutral-500 hover:text-neutral-300">Dismiss</button>
             </div>
-            {extractResult.findings.length === 0 ? (
-              <p className="text-sm text-neutral-400">No abnormal findings detected. Everything looks normal.</p>
-            ) : (
-              <div className="space-y-2">
-                <p className="text-xs text-neutral-500">{extractResult.findings.length} abnormal finding{extractResult.findings.length > 1 ? "s" : ""} added to body map
-                  {extractResult.date && ` (dated ${new Date(extractResult.date).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })})`}
-                </p>
-                {extractResult.findings.map((f, i) => (
-                  <div key={i} className="flex items-start gap-2">
-                    <div className="w-2 h-2 rounded-full bg-orange-500 mt-1.5 flex-shrink-0" />
-                    <div>
-                      <span className="text-xs font-medium text-neutral-300 capitalize">{f.bodyPart.replace(/-/g, " ")}</span>
-                      <p className="text-xs text-neutral-500">{f.note}</p>
+            <div className="space-y-3">
+              {extractResult.findings.length > 0 && (
+                <div>
+                  <p className="text-xs text-neutral-500 mb-2">{extractResult.findings.length} body finding{extractResult.findings.length > 1 ? "s" : ""} added
+                    {extractResult.date && ` (${new Date(extractResult.date).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })})`}
+                  </p>
+                  {extractResult.findings.map((f, i) => (
+                    <div key={i} className="flex items-start gap-2 mb-1">
+                      <div className="w-2 h-2 rounded-full bg-orange-500 mt-1.5 flex-shrink-0" />
+                      <div>
+                        <span className="text-xs font-medium text-neutral-300 capitalize">{f.bodyPart.replace(/-/g, " ")}</span>
+                        <p className="text-xs text-neutral-500">{f.note}</p>
+                      </div>
                     </div>
+                  ))}
+                </div>
+              )}
+              {extractResult.bloodMarkers && extractResult.bloodMarkers.length > 0 && (
+                <div>
+                  <p className="text-xs text-neutral-500 mb-2">{extractResult.bloodMarkers.length} blood marker{extractResult.bloodMarkers.length > 1 ? "s" : ""} recorded</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {extractResult.bloodMarkers.map((bm, i) => (
+                      <span key={i} className={`px-2 py-0.5 text-[10px] rounded-full border ${bm.status === "high" ? "bg-red-500/10 border-red-500/20 text-red-400" : bm.status === "low" ? "bg-blue-500/10 border-blue-500/20 text-blue-400" : "bg-green-500/10 border-green-500/20 text-green-400"}`}>
+                        {bm.type} {bm.value} {bm.unit}
+                      </span>
+                    ))}
                   </div>
-                ))}
-              </div>
-            )}
+                </div>
+              )}
+              {extractResult.findings.length === 0 && (!extractResult.bloodMarkers || extractResult.bloodMarkers.length === 0) && (
+                <p className="text-sm text-neutral-400">No abnormal findings detected.</p>
+              )}
+            </div>
           </div>
         </div>
       )}

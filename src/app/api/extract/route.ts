@@ -10,45 +10,41 @@ const BODY_PARTS = [
   "left-lower-leg", "right-lower-leg", "left-foot", "right-foot",
 ];
 
-const SYSTEM_PROMPT = `You are a medical document analyzer. Given a medical document, consult transcript, or test results, extract ONLY abnormal or noteworthy findings.
+const SYSTEM_PROMPT = `You are a medical document analyzer. Given a medical document, consult transcript, or test results, you must separate findings into two categories:
 
-For each abnormal finding:
-1. Map it to the most relevant body part from this list: ${BODY_PARTS.join(", ")}
-   - Use "upper-head" for brain, skull, neurological issues
-   - Use "lower-head" for eyes, ears, dental, jaw, face issues
-   - Use "chest" for heart, lungs, respiratory issues
-   - Use "abdomen" for digestive, liver, kidney, intestinal issues
-   - Use "neck" for thyroid, throat issues
-   - Map limb-specific issues to the appropriate limb
-   - If a finding is systemic (blood counts, general conditions), use "chest" as default
-2. Write a concise note summarizing the finding in plain language
-3. Try to identify the date of the document/consultation
+1. BODY FINDINGS - Physical changes, deformities, pain, swelling, lumps, rashes, or organ-specific issues that map to a body part.
+   Map each to a body part from: ${BODY_PARTS.join(", ")}
+   - "upper-head" for brain, skull, neurological
+   - "lower-head" for eyes, ears, dental, jaw, face
+   - "chest" for heart, lungs, respiratory
+   - "abdomen" for digestive, liver, kidney, intestinal
+   - "neck" for thyroid, throat
+   - Map limb issues to the appropriate limb
+
+2. BLOOD MARKERS - Lab values like WBC, neutrophils, lymphocytes, ferritin, haemoglobin, platelets, CRP, ESR, blood pressure, cholesterol, glucose, HbA1c, etc. These are systemic and do NOT belong on the body map.
+   For each blood marker include: type (short name like "WBC", "Neutrophils", "Ferritin"), value (the number), unit, and status ("normal", "low", or "high").
 
 IMPORTANT:
-- Only include ABNORMAL findings. If something is normal/within range, skip it completely.
-- Be concise but specific in your notes
-- Include the actual values when relevant (e.g., "Blood pressure elevated at 150/95")
+- Body findings: only include ABNORMAL physical findings
+- Blood markers: include ALL markers mentioned (normal or abnormal) so we can track them over time
+- Be concise but specific, include actual values
 
-Also provide 3-5 key takeaways from the entire document. These should be the most important things a family member tracking this person's health should know. Keep each takeaway to one plain sentence. Include both normal and abnormal highlights here.
+Also provide 3-5 key takeaways from the entire document.
 
 Respond in this exact JSON format:
 {
   "date": "YYYY-MM-DD or null if not found",
   "documentTitle": "brief title for this document",
   "findings": [
-    {
-      "bodyPart": "one of the body parts listed above",
-      "note": "concise description of the abnormal finding"
-    }
+    { "bodyPart": "body part id", "note": "description of physical finding" }
   ],
-  "takeaways": [
-    "key takeaway 1",
-    "key takeaway 2"
-  ]
+  "bloodMarkers": [
+    { "type": "WBC", "value": "5.2", "unit": "x10^9/L", "status": "normal" }
+  ],
+  "takeaways": ["key takeaway 1", "key takeaway 2"]
 }
 
-If there are no abnormal findings, return an empty findings array but still provide takeaways.
-Do not use any markdown formatting. Do not include any text outside the JSON.`;
+Do not use markdown. Do not include text outside the JSON.`;
 
 export async function POST(req: NextRequest) {
   try {

@@ -9,6 +9,7 @@ import MarkerLayer from "./body/MarkerLayer";
 import MarkerForm from "./body/MarkerForm";
 import BodyPartPanel from "./body/BodyPartPanel";
 import AnnotationList from "./body/AnnotationList";
+import BloodMarkerBar from "./body/BloodMarkerBar";
 import HistorySection from "./history/HistorySection";
 import LinksSection from "./LinksSection";
 import Dock from "./Dock";
@@ -98,6 +99,16 @@ export default function Dashboard() {
     if (modal?.type !== "edit-marker") return;
     setData((prev) => ({ ...prev, markers: prev.markers.filter((m) => m.id !== modal.marker.id) }));
     setModal(null);
+  }
+
+  function handleAddBloodMarker(type: string, value: string, unit: string, status: "normal" | "low" | "high") {
+    setData((prev) => ({ ...prev, bloodMarkers: [...(prev.bloodMarkers || []), {
+      id: crypto.randomUUID(), type, value, unit, date: new Date().toISOString(), status,
+    }] }));
+  }
+
+  function handleDeleteBloodMarker(id: string) {
+    setData((prev) => ({ ...prev, bloodMarkers: (prev.bloodMarkers || []).filter((m) => m.id !== id) }));
   }
 
   const markerCounts: Record<string, number> = {};
@@ -250,6 +261,13 @@ export default function Dashboard() {
                 </div>
               </div>
             </section>
+
+            {/* Blood Markers */}
+            <BloodMarkerBar
+              readings={data.bloodMarkers || []}
+              onAdd={handleAddBloodMarker}
+              onDelete={handleDeleteBloodMarker}
+            />
 
           </>
         )}
