@@ -5,6 +5,16 @@ export interface HealthData {
   medications: Medication[];
   surgeries: Surgery[];
   allergies: Allergy[];
+  links: SavedLink[];
+}
+
+export interface SavedLink {
+  id: string;
+  title: string;
+  url: string;
+  category: "consult" | "referral" | "document";
+  date: string;
+  notes: string;
 }
 
 export interface BodyPartEntry {
@@ -76,4 +86,5 @@ export const EMPTY_HEALTH_DATA: HealthData = {
   medications: [],
   surgeries: [],
   allergies: [],
+  links: [],
 };

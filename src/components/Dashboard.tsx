@@ -11,6 +11,7 @@ import BodyPartPanel from "./body/BodyPartPanel";
 import AnnotationList from "./body/AnnotationList";
 import VitalCard from "./vitals/VitalCard";
 import HistorySection from "./history/HistorySection";
+import LinksSection from "./LinksSection";
 
 type Modal =
   | { type: "part"; partId: string }
@@ -220,7 +221,7 @@ export default function Dashboard() {
         {/* Vitals */}
         <section>
           <h2 className="text-sm font-semibold text-stone-500 uppercase tracking-wide mb-4">Vitals</h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {VITAL_TYPES.map((vt) => (
               <VitalCard
                 key={vt.id}
@@ -231,6 +232,12 @@ export default function Dashboard() {
               />
             ))}
           </div>
+        </section>
+
+        {/* Documents & Links */}
+        <section>
+          <h2 className="text-sm font-semibold text-stone-500 uppercase tracking-wide mb-4">Documents & Links</h2>
+          <LinksSection data={data} onUpdate={setData} />
         </section>
 
         {/* Medical History */}
