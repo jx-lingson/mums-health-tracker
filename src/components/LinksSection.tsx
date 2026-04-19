@@ -2,6 +2,7 @@
 
 import { useState, useRef } from "react";
 import { HealthData, SavedLink } from "@/lib/types";
+import { findMarkerDef, getStatus } from "@/lib/bloodMarkers";
 
 interface LinksSectionProps {
   data: HealthData;
@@ -112,13 +113,16 @@ export default function LinksSection({ data, onUpdate }: LinksSectionProps) {
             const newBloodMarkers = [...(prev.bloodMarkers || [])];
             if (result.bloodMarkers && result.bloodMarkers.length > 0) {
               for (const bm of result.bloodMarkers) {
+                const def = findMarkerDef(bm.type);
+                const numVal = parseFloat(bm.value);
+                const autoStatus = def && !isNaN(numVal) ? getStatus(def, numVal) : bm.status;
                 newBloodMarkers.push({
                   id: crypto.randomUUID(),
-                  type: bm.type,
+                  type: def?.name || bm.type,
                   value: bm.value,
-                  unit: bm.unit,
+                  unit: def?.unit || bm.unit,
                   date: docDate + "T12:00:00.000Z",
-                  status: bm.status,
+                  status: autoStatus,
                 });
               }
             }
