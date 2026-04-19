@@ -77,7 +77,7 @@ export const BLOOD_MARKER_DEFS: BloodMarkerDef[] = [
 
   // Iron Studies
   { id: "iron", name: "Iron", category: "Iron Studies", unit: "μmol/L", low: 9, high: 30 },
-  { id: "ferritin", name: "Ferritin", category: "Iron Studies", unit: "μg/L", low: 15, high: 200 },
+  { id: "ferritin", name: "Ferritin", category: "Iron Studies", unit: "μg/L", low: 30, high: 300 },
   { id: "transferrin", name: "Transferrin", category: "Iron Studies", unit: "g/L", low: 2.0, high: 3.6 },
   { id: "tibc", name: "TIBC", category: "Iron Studies", unit: "μmol/L", low: 45, high: 72 },
   { id: "transferrin-sat", name: "Transferrin Saturation", category: "Iron Studies", unit: "%", low: 15, high: 45 },

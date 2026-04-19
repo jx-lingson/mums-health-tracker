@@ -107,6 +107,10 @@ export default function Dashboard() {
     }] }));
   }
 
+  function handleEditBloodMarker(id: string, comment: string) {
+    setData((prev) => ({ ...prev, bloodMarkers: (prev.bloodMarkers || []).map((m) => m.id === id ? { ...m, comment } : m) }));
+  }
+
   function handleDeleteBloodMarker(id: string) {
     setData((prev) => ({ ...prev, bloodMarkers: (prev.bloodMarkers || []).filter((m) => m.id !== id) }));
   }
@@ -266,6 +270,7 @@ export default function Dashboard() {
             <BloodMarkerBar
               readings={data.bloodMarkers || []}
               onAdd={handleAddBloodMarker}
+              onEdit={handleEditBloodMarker}
               onDelete={handleDeleteBloodMarker}
             />
 

@@ -16,6 +16,7 @@ export interface BloodMarkerReading {
   unit: string;
   date: string;
   status?: "normal" | "low" | "high";
+  comment?: string;
 }
 
 export interface SavedLink {

@@ -7,6 +7,7 @@ import { BLOOD_MARKER_DEFS, BLOOD_MARKER_CATEGORIES, BloodMarkerDef, getStatus, 
 interface BloodMarkerBarProps {
   readings: BloodMarkerReading[];
   onAdd: (type: string, value: string, unit: string, status: "normal" | "low" | "high") => void;
+  onEdit: (id: string, comment: string) => void;
   onDelete: (id: string) => void;
 }
 
@@ -51,7 +52,7 @@ const statusBg: Record<string, string> = {
   low: "bg-blue-500/10 text-blue-400",
 };
 
-export default function BloodMarkerBar({ readings, onAdd, onDelete }: BloodMarkerBarProps) {
+export default function BloodMarkerBar({ readings, onAdd, onEdit, onDelete }: BloodMarkerBarProps) {
   const [showAdd, setShowAdd] = useState(false);
   const [search, setSearch] = useState("");
   const [selectedDef, setSelectedDef] = useState<BloodMarkerDef | null>(null);
@@ -205,6 +206,7 @@ export default function BloodMarkerBar({ readings, onAdd, onDelete }: BloodMarke
                     {new Date(d + "T12:00:00").toLocaleDateString("en-AU", { month: "short", year: "numeric" })}
                   </th>
                 ))}
+                <th className="text-right text-xs font-medium text-neutral-600 pb-2 pl-2 w-8"></th>
               </tr>
             </thead>
             <tbody>
@@ -226,7 +228,7 @@ export default function BloodMarkerBar({ readings, onAdd, onDelete }: BloodMarke
                       </tr>
                     )}
                     <tr key={type}
-                      className="border-b border-neutral-800/50 hover:bg-neutral-800/30 cursor-pointer transition-colors"
+                      className="border-b border-neutral-800/50 hover:bg-neutral-800/30 cursor-pointer transition-colors group"
                       onClick={() => setExpandedMarker(expandedMarker === type ? null : type)}>
                       <td className="py-2 pr-4">
                         <div>
@@ -247,22 +249,17 @@ export default function BloodMarkerBar({ readings, onAdd, onDelete }: BloodMarke
                           </td>
                         );
                       })}
+                      <td className="py-2 pl-2 text-right">
+                        <button onClick={(e) => { e.stopPropagation(); history.forEach((r) => onDelete(r.id)); }}
+                          className="text-neutral-700 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity text-xs">&times;</button>
+                      </td>
                     </tr>
                     {expandedMarker === type && (
                       <tr key={`${type}-expanded`}>
-                        <td colSpan={2 + displayDates.length} className="pb-2">
-                          <div className="ml-1 space-y-1 pt-1">
+                        <td colSpan={3 + displayDates.length} className="pb-2">
+                          <div className="ml-1 space-y-1.5 pt-1">
                             {[...history].reverse().map((r) => (
-                              <div key={r.id} className="flex items-center justify-between text-xs py-0.5 group">
-                                <div className="flex items-center gap-2">
-                                  <span className="text-neutral-600 w-24">
-                                    {new Date(r.date).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })}
-                                  </span>
-                                  <span className={`font-medium tabular-nums ${statusBg[r.status || "normal"]?.split(" ")[1]}`}>{r.value} {unit}</span>
-                                </div>
-                                <button onClick={(e) => { e.stopPropagation(); onDelete(r.id); }}
-                                  className="text-neutral-700 hover:text-red-400 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">&times;</button>
-                              </div>
+                              <ExpandedRow key={r.id} reading={r} unit={unit} onEdit={onEdit} onDelete={onDelete} />
                             ))}
                           </div>
                         </td>
@@ -275,6 +272,46 @@ export default function BloodMarkerBar({ readings, onAdd, onDelete }: BloodMarke
           </table>
         </div>
       )}
+    </div>
+  );
+}
+
+function ExpandedRow({ reading, unit, onEdit, onDelete }: {
+  reading: BloodMarkerReading; unit: string;
+  onEdit: (id: string, comment: string) => void; onDelete: (id: string) => void;
+}) {
+  const [editingComment, setEditingComment] = useState(false);
+  const [comment, setComment] = useState(reading.comment || "");
+
+  return (
+    <div className="flex items-center gap-2 text-xs py-0.5 group/row">
+      <span className="text-neutral-600 w-24 flex-shrink-0">
+        {new Date(reading.date).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })}
+      </span>
+      <span className={`font-medium tabular-nums flex-shrink-0 ${statusBg[reading.status || "normal"]?.split(" ")[1]}`}>
+        {reading.value} {unit}
+      </span>
+      <div className="flex-1 min-w-0">
+        {editingComment ? (
+          <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+            <input type="text" value={comment} onChange={(e) => setComment(e.target.value)}
+              placeholder="Add comment..."
+              className="flex-1 bg-neutral-800 border border-neutral-700 rounded px-1.5 py-0.5 text-xs text-white placeholder-neutral-600 focus:outline-none focus:ring-1 focus:ring-orange-500"
+              autoFocus onKeyDown={(e) => { if (e.key === "Enter") { onEdit(reading.id, comment); setEditingComment(false); } }} />
+            <button onClick={() => { onEdit(reading.id, comment); setEditingComment(false); }}
+              className="text-orange-500 hover:text-orange-400">✓</button>
+            <button onClick={() => { setEditingComment(false); setComment(reading.comment || ""); }}
+              className="text-neutral-600 hover:text-neutral-400">✕</button>
+          </div>
+        ) : (
+          <button onClick={(e) => { e.stopPropagation(); setEditingComment(true); }}
+            className={`text-left truncate ${reading.comment ? "text-neutral-500" : "text-neutral-700 hover:text-neutral-500"}`}>
+            {reading.comment || "Add comment..."}
+          </button>
+        )}
+      </div>
+      <button onClick={(e) => { e.stopPropagation(); onDelete(reading.id); }}
+        className="text-neutral-700 hover:text-red-400 opacity-100 md:opacity-0 md:group-hover/row:opacity-100 transition-opacity flex-shrink-0">&times;</button>
     </div>
   );
 }
