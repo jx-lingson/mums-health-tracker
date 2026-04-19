@@ -100,7 +100,7 @@ function NoteItem({ note, partId, onEdit, onDelete }: {
         <div className="flex items-center gap-1 ml-2">
           <button onClick={() => setEditing(true)}
             className="text-neutral-600 hover:text-orange-400 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity text-xs">Edit</button>
-          <button onClick={() => onDelete(partId, note.id)}
+          <button onClick={() => { if (confirm("Delete this annotation?")) onDelete(partId, note.id); }}
             className="text-neutral-600 hover:text-red-400 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">&times;</button>
         </div>
       </div>

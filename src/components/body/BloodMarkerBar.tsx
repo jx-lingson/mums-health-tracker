@@ -250,7 +250,7 @@ export default function BloodMarkerBar({ readings, onAdd, onEdit, onDelete }: Bl
                         );
                       })}
                       <td className="py-2 pl-2 text-right">
-                        <button onClick={(e) => { e.stopPropagation(); history.forEach((r) => onDelete(r.id)); }}
+                        <button onClick={(e) => { e.stopPropagation(); if (confirm(`Delete all ${type} readings?`)) history.forEach((r) => onDelete(r.id)); }}
                           className="text-neutral-700 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity text-xs">&times;</button>
                       </td>
                     </tr>
@@ -325,7 +325,7 @@ function ExpandedRow({ reading, unit, onEdit, onDelete }: {
           </button>
         )}
       </div>
-      <button onClick={(e) => { e.stopPropagation(); onDelete(reading.id); }}
+      <button onClick={(e) => { e.stopPropagation(); if (confirm("Delete this reading?")) onDelete(reading.id); }}
         className="text-neutral-700 hover:text-red-400 opacity-100 md:opacity-0 md:group-hover/row:opacity-100 transition-opacity flex-shrink-0">&times;</button>
     </div>
   );

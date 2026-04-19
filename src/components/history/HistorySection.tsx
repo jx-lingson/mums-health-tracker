@@ -179,7 +179,7 @@ function MedItem({ med, onEdit, onDelete }: { med: Medication; onEdit: (m: Medic
       </div>
       <div className="flex items-center gap-1">
         <button onClick={() => setEditing(true)} className="text-neutral-600 hover:text-orange-400 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity text-xs">Edit</button>
-        <button onClick={onDelete} className="text-neutral-600 hover:text-red-400 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">&times;</button>
+        <button onClick={() => { if (confirm("Delete this entry?")) onDelete(); }} className="text-neutral-600 hover:text-red-400 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">&times;</button>
       </div>
     </div>
   );
@@ -256,7 +256,7 @@ function SurgeryItem({ surgery, onEdit, onDelete }: { surgery: Surgery; onEdit: 
       </div>
       <div className="flex items-center gap-1">
         <button onClick={() => setEditing(true)} className="text-neutral-600 hover:text-orange-400 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity text-xs">Edit</button>
-        <button onClick={onDelete} className="text-neutral-600 hover:text-red-400 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">&times;</button>
+        <button onClick={() => { if (confirm("Delete this entry?")) onDelete(); }} className="text-neutral-600 hover:text-red-400 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">&times;</button>
       </div>
     </div>
   );
@@ -342,7 +342,7 @@ function AllergyItem({ allergy, severityColors, onEdit, onDelete }: {
       </div>
       <div className="flex items-center gap-1">
         <button onClick={() => setEditing(true)} className="text-neutral-600 hover:text-orange-400 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity text-xs">Edit</button>
-        <button onClick={onDelete} className="text-neutral-600 hover:text-red-400 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">&times;</button>
+        <button onClick={() => { if (confirm("Delete this entry?")) onDelete(); }} className="text-neutral-600 hover:text-red-400 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">&times;</button>
       </div>
     </div>
   );

@@ -39,7 +39,7 @@ export default function MarkerForm({ marker, onSave, onDelete, onCancel }: Marke
         <div className="flex items-center gap-2 pt-1">
           <button type="submit" className="px-3 py-1.5 bg-orange-600 text-white text-sm font-medium rounded-lg hover:bg-orange-500 transition-colors">
             {marker ? "Update" : "Place Marker"}</button>
-          {marker && onDelete && <button type="button" onClick={onDelete} className="px-3 py-1.5 bg-red-950 text-red-400 text-sm font-medium rounded-lg hover:bg-red-900 transition-colors">Delete</button>}
+          {marker && onDelete && <button type="button" onClick={() => { if (confirm("Delete this marker?")) onDelete(); }} className="px-3 py-1.5 bg-red-950 text-red-400 text-sm font-medium rounded-lg hover:bg-red-900 transition-colors">Delete</button>}
           <button type="button" onClick={onCancel} className="px-3 py-1.5 text-neutral-400 text-sm font-medium rounded-lg hover:bg-neutral-800 transition-colors">Cancel</button>
         </div>
       </form>
