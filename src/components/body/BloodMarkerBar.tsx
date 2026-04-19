@@ -149,9 +149,11 @@ export default function BloodMarkerBar({ readings, onAdd, onDelete }: BloodMarke
                         className={`text-left px-2.5 py-1.5 rounded-lg text-xs transition-colors ${
                           isTracked ? "bg-neutral-800 text-neutral-300" : "hover:bg-neutral-800 text-neutral-400"
                         }`}>
-                        <span className="font-medium">{d.name}</span>
-                        <span className="text-neutral-600 ml-1">{d.unit}</span>
-                        {isTracked && <span className="text-green-500/50 ml-1">●</span>}
+                        <div className="flex items-center gap-1">
+                          <span className="font-medium">{d.name}</span>
+                          {isTracked && <span className="text-green-500/50">●</span>}
+                        </div>
+                        <span className="text-neutral-600">{d.low}{d.high < 900 ? `-${d.high}` : "+"} {d.unit}</span>
                       </button>
                     );
                   })}
