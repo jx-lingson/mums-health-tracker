@@ -7,7 +7,7 @@ import { BLOOD_MARKER_DEFS, BLOOD_MARKER_CATEGORIES, BloodMarkerDef, getStatus, 
 interface BloodMarkerBarProps {
   readings: BloodMarkerReading[];
   onAdd: (type: string, value: string, unit: string, status: "normal" | "low" | "high") => void;
-  onEdit: (id: string, comment: string) => void;
+  onEdit: (id: string, updates: { comment?: string; date?: string }) => void;
   onDelete: (id: string) => void;
 }
 
@@ -278,16 +278,31 @@ export default function BloodMarkerBar({ readings, onAdd, onEdit, onDelete }: Bl
 
 function ExpandedRow({ reading, unit, onEdit, onDelete }: {
   reading: BloodMarkerReading; unit: string;
-  onEdit: (id: string, comment: string) => void; onDelete: (id: string) => void;
+  onEdit: (id: string, updates: { comment?: string; date?: string }) => void; onDelete: (id: string) => void;
 }) {
   const [editingComment, setEditingComment] = useState(false);
+  const [editingDate, setEditingDate] = useState(false);
   const [comment, setComment] = useState(reading.comment || "");
+  const [date, setDate] = useState(reading.date.split("T")[0]);
 
   return (
     <div className="flex items-center gap-2 text-xs py-0.5 group/row">
-      <span className="text-neutral-600 w-24 flex-shrink-0">
-        {new Date(reading.date).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })}
-      </span>
+      {editingDate ? (
+        <div className="flex items-center gap-1 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+          <input type="date" value={date} onChange={(e) => setDate(e.target.value)}
+            className="bg-neutral-800 border border-neutral-700 rounded px-1.5 py-0.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-orange-500"
+            autoFocus />
+          <button onClick={() => { onEdit(reading.id, { date: date + "T12:00:00.000Z" }); setEditingDate(false); }}
+            className="text-orange-500 hover:text-orange-400">✓</button>
+          <button onClick={() => { setEditingDate(false); setDate(reading.date.split("T")[0]); }}
+            className="text-neutral-600 hover:text-neutral-400">✕</button>
+        </div>
+      ) : (
+        <button onClick={(e) => { e.stopPropagation(); setEditingDate(true); }}
+          className="text-neutral-600 hover:text-neutral-400 w-24 flex-shrink-0 text-left">
+          {new Date(reading.date).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })}
+        </button>
+      )}
       <span className={`font-medium tabular-nums flex-shrink-0 ${statusBg[reading.status || "normal"]?.split(" ")[1]}`}>
         {reading.value} {unit}
       </span>
@@ -297,8 +312,8 @@ function ExpandedRow({ reading, unit, onEdit, onDelete }: {
             <input type="text" value={comment} onChange={(e) => setComment(e.target.value)}
               placeholder="Add comment..."
               className="flex-1 bg-neutral-800 border border-neutral-700 rounded px-1.5 py-0.5 text-xs text-white placeholder-neutral-600 focus:outline-none focus:ring-1 focus:ring-orange-500"
-              autoFocus onKeyDown={(e) => { if (e.key === "Enter") { onEdit(reading.id, comment); setEditingComment(false); } }} />
-            <button onClick={() => { onEdit(reading.id, comment); setEditingComment(false); }}
+              autoFocus onKeyDown={(e) => { if (e.key === "Enter") { onEdit(reading.id, { comment }); setEditingComment(false); } }} />
+            <button onClick={() => { onEdit(reading.id, { comment }); setEditingComment(false); }}
               className="text-orange-500 hover:text-orange-400">✓</button>
             <button onClick={() => { setEditingComment(false); setComment(reading.comment || ""); }}
               className="text-neutral-600 hover:text-neutral-400">✕</button>

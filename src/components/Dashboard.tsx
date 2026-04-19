@@ -107,8 +107,8 @@ export default function Dashboard() {
     }] }));
   }
 
-  function handleEditBloodMarker(id: string, comment: string) {
-    setData((prev) => ({ ...prev, bloodMarkers: (prev.bloodMarkers || []).map((m) => m.id === id ? { ...m, comment } : m) }));
+  function handleEditBloodMarker(id: string, updates: { comment?: string; date?: string }) {
+    setData((prev) => ({ ...prev, bloodMarkers: (prev.bloodMarkers || []).map((m) => m.id === id ? { ...m, ...updates } : m) }));
   }
 
   function handleDeleteBloodMarker(id: string) {
