@@ -1,24 +1,13 @@
-import { getSupabase } from "@/lib/supabase";
+import { sql, ensureTable } from "@/lib/db";
 import { NextRequest, NextResponse } from "next/server";
 
 const DATA_ID = "chinn-health-data";
 
 export async function GET() {
-  const supabase = getSupabase();
-  if (!supabase) return NextResponse.json({ data: null });
-
   try {
-    const { data, error } = await supabase
-      .from("health_data")
-      .select("data")
-      .eq("id", DATA_ID)
-      .single();
-
-    if (error && error.code === "PGRST116") {
-      return NextResponse.json({ data: null });
-    }
-    if (error) throw error;
-    return NextResponse.json({ data: data.data });
+    await ensureTable();
+    const rows = await sql`SELECT data FROM health_data WHERE id = ${DATA_ID}`;
+    return NextResponse.json({ data: rows[0]?.data ?? null });
   } catch (error) {
     console.error("GET error:", error);
     return NextResponse.json({ data: null }, { status: 500 });
@@ -26,16 +15,14 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
-  const supabase = getSupabase();
-  if (!supabase) return NextResponse.json({ ok: false }, { status: 503 });
-
   try {
+    await ensureTable();
     const body = await req.json();
-    const { error } = await supabase
-      .from("health_data")
-      .upsert({ id: DATA_ID, data: body.data, updated_at: new Date().toISOString() });
-
-    if (error) throw error;
+    await sql`
+      INSERT INTO health_data (id, data, updated_at)
+      VALUES (${DATA_ID}, ${JSON.stringify(body.data)}, ${new Date().toISOString()})
+      ON CONFLICT (id) DO UPDATE SET data = ${JSON.stringify(body.data)}, updated_at = ${new Date().toISOString()}
+    `;
     return NextResponse.json({ ok: true });
   } catch (error) {
     console.error("POST error:", error);
