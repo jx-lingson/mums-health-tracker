@@ -7,6 +7,7 @@ export interface HealthData {
   allergies: Allergy[];
   links: SavedLink[];
   bloodMarkers: BloodMarkerReading[];
+  watchNotes?: string;
 }
 
 export interface BloodMarkerReading {

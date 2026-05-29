@@ -12,6 +12,7 @@ import AnnotationList from "./body/AnnotationList";
 import BloodMarkerBar from "./body/BloodMarkerBar";
 import HistorySection from "./history/HistorySection";
 import LinksSection from "./LinksSection";
+import WatchNotes from "./WatchNotes";
 import Dock from "./Dock";
 
 const BODY_PART_CENTERS: Record<string, [number, number]> = {
@@ -196,6 +197,10 @@ export default function Dashboard() {
       </header>
 
       <main className="max-w-6xl mx-auto px-6 py-8 space-y-6">
+        <WatchNotes
+          value={data.watchNotes || ""}
+          onChange={(val) => setData((prev) => ({ ...prev, watchNotes: val }))}
+        />
         {activeTab === "health" && (
           <>
             {/* Body Map + Annotations */}
